@@ -1,0 +1,62 @@
+---
+/*
+ * Direct Halo port of Pure's CommonPage.astro.
+ */
+import ContentLayout from "./ContentLayout.astro";
+
+interface Props {
+  title: string;
+  comment?: boolean;
+  view?: boolean;
+}
+
+const { title, comment = false, view = false } = Astro.props;
+---
+
+<ContentLayout>
+  <Fragment slot="head">
+    <title th:text={`|${title} • \${site.title}|`}>
+      {title} • Astro Theme Pure
+    </title>
+  </Fragment>
+
+  <Fragment slot="header">
+    <h1 class="text-2xl font-medium sm:mb-2 sm:text-3xl">{title}</h1>
+    {
+      (view || comment) && (
+        <div class="text-base text-sm text-muted-foreground italic">
+          <span th:text="${singlePage.stats.visit}">0</span> views
+          {comment && (
+            <>
+              {" | "}
+              <a href="#comments">
+                <span th:text="${singlePage.stats.comment}">0</span> comments
+              </a>
+            </>
+          )}
+        </div>
+      )
+    }
+  </Fragment>
+
+  <slot />
+
+  <Fragment slot="bottom">
+    {
+      comment && (
+        <section
+          id="comments"
+          th:if="${(theme.config.post.enable_comments == null or theme.config.post.enable_comments) and haloCommentEnabled}"
+          class="mt-3 sm:mt-6"
+          aria-label="Comments"
+        >
+          <halo:comment
+            group="content.halo.run"
+            kind="SinglePage"
+            th:attr="name=${singlePage.metadata.name}"
+          />
+        </section>
+      )
+    }
+  </Fragment>
+</ContentLayout>

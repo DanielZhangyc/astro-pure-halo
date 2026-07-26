@@ -1,121 +1,125 @@
-# Theme Astro Starter
+# Astro Pure for Halo
 
-面向 [Halo](https://www.halo.run/) 的主题脚手架：以 **Astro** 作为预渲染框架，将组件与页面编译为干净的 HTML，交由 **Thymeleaf** 在运行时完成数据渲染。
+本项目是 [Astro Theme Pure](https://github.com/cworld1/astro-theme-pure) 的Halo 移植版本
 
-官方主题开发指南：<https://docs.halo.run/developer-guide/theme/prepare>
+## 功能概览
 
-## 为什么选择 Astro？
+- Home、Blog、Post、Archives、Tags、Search 与错误页面；
+- Halo 分类、作者、独立页面与评论；
+- Header、Footer、三态主题切换与移动端菜单；
+- 文章目录、阅读进度、分享、二维码、Medium Zoom 与相邻文章；
+- Common Links、Links with Bad Status、Special Links 与友链历史；
+- Moments 插件适配；
+- 集中展示隐私、版权与使用规则的站点条款页面。
 
-Halo 主题采用 Thymeleaf 纯后端渲染方案，传统上只能在 HTML 文件里直接写 Thymeleaf 语法。这对简单主题足够用，但若需要 Vue / React 组件或复杂的前端交互，就会很局限。
+当前开发进度见 [Roadmap](docs/ROADMAP.md)。
 
-Astro 的特点恰好弥补了这一短板：
+## 安装与初始化
 
-- **输出干净的 HTML**：Astro 不同于 SPA 框架，其默认产物是纯 HTML 文件，而不是 JS 包。Thymeleaf 的属性（`th:text`、`th:if`、`th:replace` 等）会作为普通 HTML 属性原样保留，两者互不干扰。
-- **Island 架构**：仅在真正需要交互的地方注入客户端 JS（Vue / React 组件），其余部分零 JS 开销。
-- **组件化开发体验**：通过 Astro 组件的 `slot` 与 `props` 在 **编译阶段** 组织布局与复用，最终产物是 Thymeleaf 可直接使用的 HTML 模板。
+安装主题后，需要在 Halo「内容 → 页面」中创建以下页面：
 
-## 何时选择此 Starter？
+| 页面路径 | 页面模板 | 是否必需 |
+| --- | --- | --- |
+| `/blog` | Pure Blog | 是 |
+| `/about` | 默认 | 是 |
+| `/terms` | Pure 站点条款 | 是 |
+| `/links` | Pure Links | 否 |
 
-| 场景                                                    | 推荐                                                                          |
-| ------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 主题有较多前端交互，希望用 Vue / React 编写 Island 组件 | **本 Starter**                                                                |
-| 主题以静态展示为主，前端交互需求较少                    | [halo-dev/theme-vite-starter](https://github.com/halo-dev/theme-vite-starter) |
+## 配置说明
 
-## 技术栈
+### 首页
 
-| 类别    | 说明                                                                                                                                              |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 运行时  | Halo 使用 **Thymeleaf** 渲染主题；模板变量与 Finder API 随 Halo 版本演进，请以[官方文档](https://docs.halo.run/developer-guide/theme/prepare)为准 |
-| 预渲染  | **Astro**，将 `src/` 下的页面与组件编译为 `templates/` 下的纯 HTML                                                                                |
-| UI 框架 | **Vue 3**（通过 `@astrojs/vue` 集成，用于编写 Island 组件）                                                                                       |
-| 语言    | TypeScript（Astro 组件 frontmatter 支持）                                                                                                         |
-| 包管理  | **pnpm**                                                                                                                                          |
+首页支持个人资料、Education、Website List、Certifications、Skills 与随机名言。
+各内容区块分别提供显示开关与内容列表。
 
-## 核心概念：Astro 编译期 vs Thymeleaf 运行期
+### 友链
 
-理解这两个阶段的边界是使用本 Starter 的关键：
+友链设置由以下五部分组成：
 
-```
-开发时                           构建后                    Halo 运行时
-─────────────────────────────    ──────────────────────    ──────────────────────────
-src/pages/index.astro        →   templates/index.html  →   Thymeleaf 注入数据渲染
-  Astro 组件 / slot / props         干净的 HTML +              th:text / th:if 生效
-  Vue Island 组件                   Thymeleaf 属性原样          客户端 JS 激活 Island
-```
+1. Common Links；
+2. Links with Bad Status；
+3. Special Links；
+4. Link History Book；
+5. Apply Links 申请说明。
 
-**重要限制**：
+三类友链使用相同的数据结构，包括站点名称、简介、地址与头像。头像为空时，主题
+根据站点地址请求 `/favicon.ico`。
 
-- `slot`、`props` 是 Astro **编译期**的概念，Thymeleaf 运行时感知不到它们，也无法向 Astro 组件传递动态数据。
-- 在 Astro 组件中可以直接写 `th:text`、`th:if`、`th:replace` 等 Thymeleaf 属性——Astro 会将其视为普通 HTML 属性原样输出，Thymeleaf 在运行时才会处理它们。
-- Vue / React Island 组件（`client:*`）的数据来源是客户端（例如调用 Halo API），无法直接使用 Thymeleaf 的服务端变量。
+Apply Links 中的本站名称、简介、地址与头像读取 Halo 站点设置，不需要重复配置。
 
-## 目录结构
+### 文章
 
-```
-.
-├── src/
-│   ├── pages/           # Astro 页面（编译为 templates/ 下的 HTML）
-│   │   ├── index.astro
-│   │   ├── post.astro
-│   │   ├── category.astro
-│   │   └── ...
-│   ├── layouts/
-│   │   └── Layout.astro # 全局布局组件
-│   ├── components/
-│   │   ├── Header.astro
-│   │   ├── Footer.astro
-│   │   ├── ThemeSwitcher.vue  # Vue Island 示例
-│   │   └── ...
-│   └── styles/          # 全局样式
-├── public/              # 原样复制到 templates/：静态资源或纯 Thymeleaf 模板均可放此处
-│   └── fragments/       # 纯 Thymeleaf 片段示例（不经 Astro 编译，直接输出）
-├── templates/           # Astro 构建产物（Halo 实际读取的模板目录）
-├── theme.yaml           # 主题元数据（必填）
-├── settings.yaml        # 控制台主题设置表单（可选）
-├── astro.config.mjs
-└── package.json
-```
+文章设置包括封面、目录样式、阅读进度、评论、相邻文章与 Medium Zoom。
 
-> **`templates/` 是构建产物**，不要直接在此目录手动修改；请修改 `src/` 后重新构建。
+### 站点条款
 
-## 开发
+`/terms` 默认包含使用规则、个人信息处理、第三方服务、未成年人、版权、免责
+声明、条款更新与联系方式。普通个人博客可以直接使用默认内容。
+
+### 页脚
+
+页脚支持备案信息、站点条款、Halo & Pure Powered、GitHub 与 RSS。备案信息默认
+为空。GitHub 地址固定指向
+[DanielZhangyc/astro-pure-halo](https://github.com/DanielZhangyc/astro-pure-halo)。
+
+## 开发状态
+
+- [x] About 使用 Halo 默认页面正文，并保留旧模板兼容
+- [x] 友链页面及五项配置
+- [x] 单页站点条款
+- [x] Moments 插件适配
+- [ ] Projects 专用页面与模块化设置
+- [ ] 文章底部 “Buy me a cup of coffee”
+
+Projects 与文章赞助入口当前不参与页面渲染。旧版本的 Pure Projects 模板会回退
+为普通 Halo 页面正文。
+
+## 开发与构建
+
+本地开发需要 Node.js 22.12+、pnpm 10+ 与 JRE 21+。
 
 ```bash
-git clone https://github.com/halo-sigs/theme-astro-starter.git ~/halo2-dev/themes/astro-starter
-cd ~/halo2-dev/themes/astro-starter
 pnpm install
 pnpm dev
 ```
 
-`pnpm dev` 会启动 Astro 开发服务器并监听 `src/` 变更，实时重新生成 `templates/`。
+默认服务地址：
 
-将主题目录链接或复制到 Halo 的 `themes/astro-starter/` 后，在控制台安装并启用主题即可预览。建议同时关闭 Thymeleaf 缓存以便热更新调试：
+- 站点：<http://localhost:8090>
+- Console：<http://localhost:8090/console>
 
-```yaml
-# application.yaml
-spring:
-  thymeleaf:
-    cache: false
-```
-
-或通过环境变量：`SPRING_THYMELEAF_CACHE=false`
-
-## 构建
+可以通过环境变量修改端口：
 
 ```bash
-pnpm build
+HALO_PORT=8091 pnpm dev
 ```
 
-执行 Astro 构建，将 `src/` 编译输出到 `templates/`。构建完成后可将主题目录（含 `templates/`、`theme.yaml`、`settings.yaml` 等）打包为 ZIP 上传到 Halo 控制台，或使用 [`@halo-dev/theme-package-cli`](https://github.com/halo-dev/theme-package-cli) 完成打包。
+执行检查、构建与打包：
 
-## 其他脚本
+```bash
+pnpm check
+pnpm build
+pnpm package
+```
 
-| 命令          | 作用                    |
-| ------------- | ----------------------- |
-| `pnpm format` | Prettier 格式化所有文件 |
+构建结果写入 `templates/`，主题安装包写入 `dist/`。`templates/` 属于构建产物，
+不应直接修改。
 
-## 注意事项
+## 移植基准
 
-- Astro 配置中 `base` 需与 `theme.yaml` 的 `metadata.name` 保持一致（当前为 `astro-starter`），这决定了静态资源的引用路径。
-- `public/` 目录不仅可以存放图片、字体等静态资源，也可以存放**纯 Thymeleaf 模板**（例如 `public/fragments/post-list.html`）。这些文件会被 Astro 原样复制到 `templates/` 对应路径，不经过任何编译处理，适合编写不需要 Astro 组件化的 Thymeleaf 片段。
-- Vue Island 组件可通过 Halo 提供的 [API Client](https://www.npmjs.com/package/@halo-dev/api-client) 在客户端获取数据。
+- 上游仓库：[cworld1/astro-theme-pure](https://github.com/cworld1/astro-theme-pure)
+- 本地对照：`.reference/astro-theme-pure`
+- 对照提交：`0047f6d4278d4c3e823dca608022cd6ebe7b5c96`
+- 项目约束：[AGENTS.md](AGENTS.md)
+
+## 相关文档
+
+- [开发说明](docs/DEVELOPMENT.md)
+- [实施报告](docs/IMPLEMENTATION_REPORT.md)
+- [开发计划](docs/ROADMAP.md)
+
+## 开源许可
+
+本项目基于 Apache License 2.0 发布，上游来源与许可信息见 [NOTICE](NOTICE)。
+
+原主题仓库：[cworld1/astro-theme-pure](https://github.com/cworld1/astro-theme-pure)

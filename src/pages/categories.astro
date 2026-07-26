@@ -1,22 +1,46 @@
 ---
+/*
+ * Halo categories use the exact Pure all-tags visual pattern because the
+ * upstream Astro theme has no separate category content type.
+ */
+import PureButton from "../components/PureButton.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout pageTitle="分类">
+<Layout>
   <Fragment slot="head">
-    <title th:text="|分类 - ${site.title}|"></title>
+    <title th:text="|Categories • ${site.title}|">
+      Categories • Astro Theme Pure
+    </title>
   </Fragment>
 
-  <nav class="taxonomy-list" aria-label="Category list">
-    <div th:each="category : ${categories}" class="taxonomy-list__item">
-      <a
-        class="taxonomy-list__link"
-        th:href="@{${category.status.permalink}}"
-        th:text="${category.spec.displayName}"
-      >
-      </a>
-      <span class="taxonomy-list__count" th:text="|${category.postCount} 篇|">
-      </span>
+  <PureButton title="Back" href="/archives" variant="back" />
+  <main class="mt-6 lg:mt-10">
+    <div id="content-header" class="animate">
+      <h1 class="mb-6 text-3xl font-medium">Categories</h1>
     </div>
-  </nav>
+    <div id="content" class="animate">
+      <ul
+        th:if="${not #lists.isEmpty(categories)}"
+        class="flex flex-wrap gap-4"
+      >
+        <li th:each="category : ${categories}">
+          <a
+            th:href="${category.status.permalink}"
+            class="group inline-flex items-start gap-x-1 rounded-xl bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+            th:classappend="${category.postCount gt 2 ? ' px-3 py-1 text-xl' : (category.postCount gt 1 ? ' text-lg' : '')}"
+          >
+            <span th:text="${category.spec.displayName}">Category</span>
+            <span
+              th:class="${category.postCount gt 2 ? 'text-base' : 'text-xs'}"
+              th:text="${category.postCount}"
+            >
+              3
+            </span>
+          </a>
+        </li>
+      </ul>
+      <p th:if="${#lists.isEmpty(categories)}">Any category yet.</p>
+    </div>
+  </main>
 </Layout>

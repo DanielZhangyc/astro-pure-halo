@@ -1,0 +1,96 @@
+---
+/*
+ * Direct Halo data port of Astro Theme Pure 4.1.4 links/index.astro.
+ * The visible structure and copy order intentionally follow the upstream page.
+ */
+import Collapse from "../components/Collapse.astro";
+import FriendList from "../components/FriendList.astro";
+import Timeline from "../components/Timeline.astro";
+import CommonPage from "../layouts/CommonPage.astro";
+---
+
+<CommonPage title="Links" comment>
+  <p>They're sorted randomly.</p>
+
+  <h2 id="common-links">Common Links</h2>
+  <FriendList
+    friends={[]}
+    runtimeSource="theme.config.pages_links.common_friends"
+  />
+
+  <Collapse title="Links with Bad Status">
+    <FriendList
+      friends={[]}
+      runtimeSource="theme.config.pages_links.bad_friends"
+    />
+  </Collapse>
+
+  <Collapse title="Link History Book">
+    <Timeline
+      events={[]}
+      runtimeSource="theme.config.pages_links.history"
+    />
+  </Collapse>
+
+  <h2 id="special-links">Special Links</h2>
+  <FriendList
+    friends={[]}
+    runtimeSource="theme.config.pages_links.special_friends"
+  />
+
+  <h2 id="apply-links">Apply Links</h2>
+  <p>本站信息（点击复制）The site information (click to copy)：</p>
+  <blockquote
+    class="not-prose grid grid-cols-[auto_1fr] gap-x-2 break-words border-s-4 ps-4"
+  >
+    <span class="text-end">名称 Name:</span>
+    <samp
+      class="cursor-pointer"
+      th:attr="data-copy=${site.title}"
+      th:text="${site.title}"
+    >Site title</samp>
+
+    <span class="text-end">简介 Intro:</span>
+    <samp
+      class="cursor-pointer"
+      th:attr="data-copy=${site.subtitle}"
+      th:text="${site.subtitle}"
+    >Site description</samp>
+
+    <span class="text-end">地址 Link:</span>
+    <samp
+      class="cursor-pointer"
+      th:attr="data-copy=${site.url}"
+      th:text="${site.url}"
+    >https://example.com/</samp>
+
+    <span class="text-end">头像 Avatar:</span>
+    <samp
+      class="cursor-pointer"
+      th:attr="data-copy=${#strings.isEmpty(site.logo) ? site.url + '/favicon.ico' : site.logo}"
+      th:text="${#strings.isEmpty(site.logo) ? site.url + '/favicon.ico' : site.logo}"
+    >https://example.com/favicon.ico</samp>
+  </blockquote>
+
+  <p
+    class="whitespace-pre-line"
+    th:text="${#strings.isEmpty(theme.config.pages_links.apply_description) ? '可通过下方留言申请友链。申请前请先添加本站，并确保站点可以正常访问、具有正式域名、包含持续更新的原创内容，且内容不违反适用法律法规。' : theme.config.pages_links.apply_description}"
+  >
+    可通过下方留言申请友链。申请前请先添加本站，并确保站点可以正常访问、具有正式域名、包含持续更新的原创内容，且内容不违反适用法律法规。
+  </p>
+</CommonPage>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-copy]").forEach((element) => {
+    element.addEventListener("click", async () => {
+      const value = element.dataset.copy || "";
+      if (!value) return;
+      await navigator.clipboard.writeText(value);
+      document.dispatchEvent(
+        new CustomEvent("pure-toast", {
+          detail: { message: `Copied "${value}" to clipboard!` },
+        }),
+      );
+    });
+  });
+</script>

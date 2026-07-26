@@ -1,40 +1,31 @@
 ---
+/* Category listing uses Pure's tag-list page without visual alterations. */
+import PureButton from "../components/PureButton.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|${category.spec.displayName} - ${site.title}|"></title>
+    <title th:text="|Category: ${category.spec.displayName} • ${site.title}|">
+      Category • Astro Theme Pure
+    </title>
   </Fragment>
 
-  <div class="page-heading">
-    <h1 th:text="${category.spec.displayName}"></h1>
-    <p class="page-meta">
-      <span th:text="|${posts.total} 篇文章|"></span>
-    </p>
-  </div>
-
-  <th:block th:replace="~{fragments/post-list}"></th:block>
-
-  <div th:if="${posts.total == 0}" class="feed-empty">暂无文章。</div>
-
-  <nav
-    th:if="${posts.totalPages gt 1}"
-    class="pagination"
-    aria-label="Pagination"
-  >
-    <a
-      th:if="${posts.hasPrevious()}"
-      th:href="@{${posts.prevUrl}}"
-      class="pagination__prev">&larr; 较新</a
-    >
-    <span
-      class="pagination__info"
-      th:text="|${posts.page} / ${posts.totalPages}|"></span>
-    <a
-      th:if="${posts.hasNext()}"
-      th:href="@{${posts.nextUrl}}"
-      class="pagination__next">较旧 &rarr;</a
-    >
-  </nav>
+  <PureButton title="Back" href="/categories" variant="back" />
+  <main class="mt-6 lg:mt-10">
+    <div id="content-header" class="animate">
+      <h1 class="mb-6 flex items-end gap-x-2 text-3xl font-medium">
+        Category:
+        <span class="text-2xl" th:text="${category.spec.displayName}">
+          Category
+        </span>
+      </h1>
+    </div>
+    <section id="content" class="animate" aria-label="Blog post list">
+      <th:block
+        th:replace="~{fragments/post-list :: postList(postItems=${posts.items})}"
+      ></th:block>
+      <th:block th:replace="~{fragments/pagination}"></th:block>
+    </section>
+  </main>
 </Layout>

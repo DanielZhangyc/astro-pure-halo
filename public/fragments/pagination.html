@@ -1,0 +1,21 @@
+<!-- Direct Thymeleaf port of Pure Paginator.astro. -->
+<nav
+  th:if="${posts.totalPages gt 1}"
+  class="mt-4 flex items-center gap-x-4 sm:mt-6"
+  aria-label="Pagination"
+>
+  <a
+    th:if="${posts.hasPrevious()}"
+    th:href="@{${posts.prevUrl}}"
+    class="me-auto py-2"
+  >
+    ← Previous Posts
+  </a>
+  <a
+    th:if="${posts.hasNext()}"
+    th:href="@{${posts.nextUrl}}"
+    class="ms-auto py-2"
+  >
+    Next Posts →
+  </a>
+</nav>

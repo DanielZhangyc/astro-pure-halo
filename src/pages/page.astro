@@ -1,25 +1,43 @@
 ---
-import Layout from "../layouts/Layout.astro";
+/*
+ * Direct Halo port of Pure's CommonPage.astro.
+ */
+import ContentLayout from "../layouts/ContentLayout.astro";
 ---
 
-<Layout contentClass="prose">
+<ContentLayout>
   <Fragment slot="head">
-    <title th:text="|${singlePage.spec.title} - ${site.title}|"></title>
+    <title th:text="|${singlePage.spec.title} • ${site.title}|">
+      Page • Astro Theme Pure
+    </title>
+    <meta name="description" th:content="${singlePage.status.excerpt}" />
+    <meta th:content="${singlePage.spec.title}" property="og:title" />
+    <meta th:content="${singlePage.status.excerpt}" property="og:description" />
   </Fragment>
 
-  <div class="page-heading">
-    <h1 th:text="${singlePage.spec.title}"></h1>
-    <p class="page-meta">
-      <span
-        th:text="${#dates.format(singlePage.spec.publishTime, 'yyyy-MM-dd')}"
-      ></span>
-    </p>
-  </div>
+  <Fragment slot="header">
+    <h1
+      class="text-2xl font-medium sm:mb-2 sm:text-3xl"
+      th:text="${singlePage.spec.title}"
+    >
+      Page title
+    </h1>
+  </Fragment>
 
   <div th:utext="${singlePage.content.content}"></div>
 
-  <halo:comment
-    group="content.halo.run"
-    kind="SinglePage"
-    th:attr="name=${singlePage.metadata.name}"></halo:comment>
-</Layout>
+  <Fragment slot="bottom">
+    <section
+      th:if="${(theme.config.post.enable_comments == null or theme.config.post.enable_comments) and haloCommentEnabled}"
+      class="mt-3 sm:mt-6"
+      aria-label="Comments"
+    >
+      <halo:comment
+        group="content.halo.run"
+        kind="SinglePage"
+        th:attr="name=${singlePage.metadata.name}"
+      >
+      </halo:comment>
+    </section>
+  </Fragment>
+</ContentLayout>

@@ -1,52 +1,222 @@
 ---
+/*
+ * Direct Halo port of Astro Theme Pure 4.1.4 BaseLayout.astro.
+ * The visible structure and values match upstream; only metadata and runtime
+ * data expressions are supplied by Halo.
+ */
+import "../styles/font.css";
 import "../styles/global.css";
+import "../styles/app.css";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
+import Icon from "../components/Icon.astro";
+import IconSprite from "../components/IconSprite.astro";
 
 interface Props {
+  highlightColor?: string;
   pageTitle?: string;
-  contentClass?: string;
+  wide?: boolean;
 }
 
-const { pageTitle, contentClass } = Astro.props;
-
-const hasHeading = Boolean(pageTitle);
+const { highlightColor = "#659EB9" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html
+  lang="en-US"
+  th:lang="${site.language}"
+  style={`--highlightColor:${highlightColor}`}
+  th:style="|--highlightColor:${#strings.isEmpty(theme.config.style.highlight_color) ? '#659EB9' : theme.config.style.highlight_color}|"
+>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#FCFCFD" />
+    <meta name="description" th:content="${site.subtitle}" />
+
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="/themes/astro-pure-halo/assets/pure/favicon/favicon.ico"
+      th:href="${#strings.isEmpty(site.favicon) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon.ico' : site.favicon}"
+    />
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="/themes/astro-pure-halo/assets/pure/favicon/favicon.ico"
+      th:href="${#strings.isEmpty(site.favicon) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon.ico' : site.favicon}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/themes/astro-pure-halo/assets/pure/favicon/favicon-16x16.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/themes/astro-pure-halo/assets/pure/favicon/apple-touch-icon.png"
+    />
+
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="RSS"
+      href="/rss.xml"
+    />
+
     <script is:inline>
-      (function () {
-        var stored = localStorage.getItem("theme");
-        var prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)",
-        ).matches;
-        if (stored === "dark" || (!stored && prefersDark)) {
-          document.documentElement.classList.add("dark");
+      function simpleSetTheme() {
+        let theme = localStorage.getItem("theme");
+        if (!theme || theme === "system") {
+          theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
         }
-      })();
+        document.documentElement.classList.toggle("dark", theme === "dark");
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", theme === "dark" ? "#0B0B10" : "#FCFCFD");
+      }
+      simpleSetTheme();
     </script>
+
     <slot name="head" />
   </head>
-  <body>
-    <Header />
-    <main class="layout-main">
-      <article class="page-shell">
-        {
-          hasHeading && (
-            <header class="page-heading">
-              {pageTitle && <h1>{pageTitle}</h1>}
-            </header>
-          )
+
+  <body class="flex justify-center bg-background text-foreground">
+    <IconSprite />
+    <div
+      id="highlight-gradient"
+      class="pointer-events-none absolute start-0 top-0 z-0 h-screen w-full opacity-25"
+      style="background-image:linear-gradient(var(--highlightColor),transparent)"
+    >
+    </div>
+
+    <div
+      id="main-container"
+      class="w-full max-w-[70rem] min-h-[100dvh] flex flex-col justify-between"
+    >
+      <Header />
+      <div class="flex-1 w-full">
+        <slot />
+      </div>
+      <Footer />
+    </div>
+
+    <template id="pure-toast-template">
+      <div
+        class="animate fixed bottom-8 z-20 px-4 py-2 bg-muted text-foreground rounded-lg border shadow-lg flex items-center gap-2"
+      >
+        <Icon name="info" />
+        <span></span>
+      </div>
+    </template>
+
+    <script>
+      document.addEventListener("pure-toast", (event) => {
+        const detail = (event as CustomEvent).detail;
+        const template = document.querySelector<HTMLTemplateElement>(
+          "#pure-toast-template",
+        );
+        const toast = template?.content.firstElementChild?.cloneNode(
+          true,
+        ) as HTMLElement | null;
+        if (!toast) return;
+        const message = toast.querySelector("span");
+        if (message) message.textContent = detail.message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), detail.time || 3000);
+      });
+
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", () => {
+          if ((localStorage.getItem("theme") || "system") === "system") {
+            const dark = window.matchMedia(
+              "(prefers-color-scheme: dark)",
+            ).matches;
+            document.documentElement.classList.toggle("dark", dark);
+          }
+        });
+
+      const pureDateFormatter = new Intl.DateTimeFormat("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+      const pureLongDateFormatter = new Intl.DateTimeFormat("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      document.querySelectorAll<HTMLElement>("[data-pure-date]").forEach((date) => {
+        const value = date.getAttribute("datetime");
+        if (!value) return;
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime())) {
+          date.textContent = pureDateFormatter.format(parsed);
         }
-        <div class:list={["page-content", contentClass]}>
-          <slot />
-        </div>
-      </article>
-    </main>
-    <Footer />
+      });
+      document
+        .querySelectorAll<HTMLElement>("[data-pure-date-long]")
+        .forEach((date) => {
+          const value = date.getAttribute("datetime");
+          if (!value) return;
+          const parsed = new Date(value);
+          if (!Number.isNaN(parsed.getTime())) {
+            date.textContent = pureLongDateFormatter.format(parsed);
+          }
+        });
+    </script>
   </body>
 </html>
+
+<style define:vars={{ highlightColor }}>
+  :global(.highlight) {
+    --highlight-fg: color-mix(
+      in srgb,
+      var(--highlightColor) 40%,
+      hsl(var(--foreground) / var(--un-text-opacity, 1))
+    );
+    color: var(
+      --highlight-fg,
+      hsl(var(--primary) / var(--un-text-opacity))
+    ) !important;
+  }
+  :global(.highlight-bg) {
+    background-color: var(
+      --highlightColor,
+      hsl(var(--primary) / var(--un-text-opacity))
+    ) !important;
+  }
+
+  #main-container {
+    padding-top: env(safe-area-inset-top);
+    padding-left: calc(1rem + env(safe-area-inset-left));
+    padding-right: calc(1rem + env(safe-area-inset-right));
+  }
+  @media (min-width: 640px) {
+    #main-container {
+      padding-left: calc(1.75rem + env(safe-area-inset-left));
+      padding-right: calc(1.75rem + env(safe-area-inset-right));
+    }
+  }
+  @media (min-width: 1024px) {
+    #main-container {
+      padding-left: calc(2.5rem + env(safe-area-inset-left));
+      padding-right: calc(2.5rem + env(safe-area-inset-right));
+    }
+  }
+</style>

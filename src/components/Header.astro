@@ -1,172 +1,266 @@
 ---
-import ThemeSwitcher from "./ThemeSwitcher.vue";
-import UserButton from "./UserButton.vue";
+/*
+ * Markup, class names, breakpoints and behavior are ported directly from
+ * astro-pure/components/basic/Header.astro (Astro Theme Pure 4.1.4).
+ * Only the menu/search data source is replaced with Halo runtime data.
+ */
+import Icon from "./Icon.astro";
 ---
 
-<header>
-  <div class="header-inner">
-    <a class="brand" href="/" th:text="${site.title}"></a>
-    <nav
-      th:with="menu = ${menuFinder.getPrimary()}"
-      aria-label="Main navigation"
+<header-component
+  class="group sticky top-4 z-50 max-md:z-30 mb-12 flex items-center justify-between rounded-xl border border-transparent max-sm:py-1 sm:rounded-2xl"
+>
+  <a
+    class="z-30 text-xl font-medium group-[.not-top]:ms-2 sm:group-[.not-top]:ms-3"
+    style="transition:margin-inline 0.3s"
+    href="/"
+    aria-label="Brand"
+    th:text="${site.title}"
+  >
+    Astro Theme Pure
+  </a>
+
+  <div class="flex items-center gap-x-2">
+    <div
+      id="headerExpandContent"
+      class="end-0 start-0 top-12 grid border border-transparent group-[.not-top]:rounded-xl group-[.expanded]:opacity-100 dark:group-[.expanded.not-top]:bg-muted max-sm:absolute max-sm:opacity-0 max-sm:group-[.not-top]:border-border max-sm:group-[.expanded.not-top]:bg-background max-sm:group-[.not-top]:px-4 max-sm:group-[.not-top]:py-2 sm:grid-rows-1"
     >
-      <a
-        th:each="menuItem : ${menu.menuItems}"
-        th:href="@{${menuItem.status.href}}"
-        th:target="${menuItem.spec.target?.value}"
-        th:text="${menuItem.status.displayName}"
+      <div
+        class="flex flex-col items-center justify-center overflow-hidden sm:flex-row"
       >
-      </a>
-    </nav>
-    <div class="header-actions">
-      <ThemeSwitcher client:load />
-      <UserButton client:load>
-        <div slot="fallback" class="user-button-fallback" aria-hidden="true">
-          <span class="user-button-fallback__avatar"></span>
-          <span class="user-button-fallback__text"></span>
+        <nav
+          class="contents"
+          th:with="menu = ${menuFinder.getPrimary()}"
+          aria-label="Primary navigation"
+        >
+          <a
+            th:if="${menu != null}"
+            th:each="menuItem : ${menu.menuItems}"
+            th:href="@{${menuItem.status.href}}"
+            th:target="${menuItem.spec.target?.value}"
+            th:text="${menuItem.status.displayName}"
+            class="w-full flex-none grow py-2 text-right font-medium transition-none hover:text-primary sm:w-fit sm:px-3"
+            aria-label="Nav menu item"
+          >
+            Blog
+          </a>
+        </nav>
+        <div class="flex w-full grow flex-row justify-end gap-x-3 sm:w-fit sm:gap-x-5">
+          <a
+            th:if="${theme.config.header.show_search == null or theme.config.header.show_search}"
+            class="px-1 py-2 transition-none sm:px-2"
+            href="/search"
+            title="Search"
+          >
+            <span class="sr-only">Search</span>
+            <Icon name="search" class="size-5" />
+          </a>
         </div>
-      </UserButton>
+      </div>
+    </div>
+
+    <div
+      class="z-30 flex gap-x-4 group-[.not-top]:gap-x-2"
+      style="transition:gap 0.3s"
+    >
+      <button
+        id="toggleDarkMode"
+        class="group/dark box-content size-5 rounded-md border p-1.5 transition-colors hover:bg-border sm:group-[.not-top]:rounded-xl"
+      >
+        <span class="sr-only">Dark Theme</span>
+        <Icon
+          class="system size-5 group-hover/dark:text-primary"
+          name="computer"
+        />
+        <Icon
+          class="light hidden size-5 group-hover/dark:text-primary"
+          name="sun"
+        />
+        <Icon
+          class="dark hidden size-5 group-hover/dark:text-primary"
+          name="moon"
+        />
+      </button>
+      <button
+        id="toggleMenu"
+        class="rounded-md border p-1.5 transition-colors hover:bg-border sm:hidden sm:group-[.not-top]:rounded-xl"
+      >
+        <span class="sr-only">Menu</span>
+        <Icon class="size-5" name="menu" />
+      </button>
     </div>
   </div>
-</header>
+</header-component>
+
+<script is:inline>
+  const toggleDarkModeElement = document.getElementById("toggleDarkMode");
+  if (toggleDarkModeElement) {
+    toggleDarkModeElement.dataset.theme =
+      localStorage.getItem("theme") || "system";
+  }
+</script>
+
+<script>
+  function resolveAndSetTheme(theme?: string, save = false) {
+    const themes = ["system", "dark", "light"];
+    if (!theme) {
+      theme = localStorage.getItem("theme") || "system";
+      if (save) {
+        const currentIndex = themes.indexOf(theme);
+        theme = themes[(currentIndex + 1) % themes.length];
+        localStorage.setItem("theme", theme);
+      }
+    } else if (save) {
+      localStorage.setItem("theme", theme);
+    }
+    let targetTheme = theme;
+    if (theme === "system") {
+      targetTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    document.documentElement.classList.toggle("dark", targetTheme === "dark");
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", targetTheme === "dark" ? "#0B0B10" : "#FCFCFD");
+    return theme;
+  }
+
+  function showThemeToast(message: string) {
+    document.dispatchEvent(
+      new CustomEvent("pure-toast", { detail: { message } }),
+    );
+  }
+
+  class HeaderComponent extends HTMLElement {
+    connectedCallback() {
+      let preScrollY = window.scrollY;
+      const updateHeader = (currentScrollY = window.scrollY) => {
+        this.classList.toggle("not-top", currentScrollY > 20);
+        this.dataset.show = (
+          currentScrollY < 350 || currentScrollY < preScrollY
+        ).toString();
+        preScrollY = currentScrollY;
+      };
+
+      updateHeader();
+      window.addEventListener(
+        "scroll",
+        () => updateHeader(),
+        { passive: true },
+      );
+      window.addEventListener("pageshow", () => updateHeader());
+
+      const darkModeBtn = this.querySelector<HTMLElement>("#toggleDarkMode");
+      darkModeBtn?.addEventListener("click", () => {
+        const newTheme = resolveAndSetTheme(undefined, true);
+        darkModeBtn.dataset.theme = newTheme;
+        showThemeToast(`Set theme to ${newTheme}`);
+      });
+
+      this.querySelector("#toggleMenu")?.addEventListener("click", () => {
+        this.classList.toggle("expanded");
+      });
+    }
+  }
+
+  if (!customElements.get("header-component")) {
+    customElements.define("header-component", HeaderComponent);
+  }
+</script>
 
 <style>
-  header {
-    background: var(--bg);
-    border-bottom: 1px solid var(--rule);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .header-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    width: 820px;
-    max-width: calc(100% - 2.5rem);
-    margin: 0 auto;
-    height: 58px;
-  }
-
-  .brand {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--ink);
-    text-decoration: none;
-    letter-spacing: -0.02em;
-    flex-shrink: 0;
-  }
-
-  .brand:hover {
-    color: var(--accent);
-  }
-
-  nav {
-    display: flex;
-    align-items: center;
-    gap: 0.2rem;
-    flex: 1;
-  }
-
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin-left: auto;
-  }
-
-  .user-button-fallback {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    box-sizing: border-box;
-    flex-shrink: 0;
-    width: 112px;
-    height: 34px;
-    padding: 0 0.7rem;
-    border-radius: 8px;
-    pointer-events: none;
-  }
-
-  .user-button-fallback__avatar,
-  .user-button-fallback__text {
-    display: block;
-    background: linear-gradient(
-      90deg,
-      var(--bg-raised) 0%,
-      color-mix(in srgb, var(--bg-raised) 78%, var(--ink) 22%) 50%,
-      var(--bg-raised) 100%
-    );
-    background-size: 200% 100%;
-    animation: user-button-fallback-shimmer 1.2s ease-in-out infinite;
-  }
-
-  .user-button-fallback__avatar {
-    width: 20px;
-    height: 20px;
-    border-radius: 999px;
-    flex-shrink: 0;
-  }
-
-  .user-button-fallback__text {
-    width: 100%;
-    height: 0.72rem;
-    border-radius: 999px;
-  }
-
-  nav :global(a) {
-    display: inline-block;
-    padding: 0.3rem 0.65rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: var(--ink-2);
-    text-decoration: none;
+  header-component {
     transition:
-      color 0.15s ease,
-      background 0.15s ease;
-  }
+      padding 0.3s,
+      transform 0.3s,
+      margin-inline 0.3s,
+      border 0.15s,
+      background-color 0.15s;
 
-  nav :global(a:hover) {
-    color: var(--ink);
-    background: var(--bg-raised);
-  }
-
-  nav :global(a.active) {
-    color: var(--ink);
-    background: var(--bg-raised);
-    font-weight: 600;
-  }
-
-  @media (max-width: 680px) {
-    .header-inner {
-      flex-direction: column;
-      align-items: flex-start;
-      height: auto;
-      padding: 1rem 0;
-      gap: 0.75rem;
+    &.not-top {
+      --un-border-opacity: 1;
+      border-color: hsl(var(--border) / var(--un-border-opacity));
+      --un-bg-opacity: 1;
+      background-color: hsl(var(--background) / var(--un-bg-opacity));
+      padding-left: 0.375rem;
+      padding-right: 0.375rem;
+      box-shadow:
+        rgb(255, 255, 255) 0px 0px 0px 0px,
+        rgba(24, 24, 27, 0.08) 0px 0px 0px 1px,
+        rgba(39, 39, 42, 0.08) 0px 10px 15px -3px,
+        rgba(39, 39, 42, 0.08) 0px 4px 6px -4px;
     }
-
-    nav {
-      flex-wrap: wrap;
-      gap: 0.1rem;
-      margin-left: -0.65rem;
-      flex: initial;
-    }
-
-    .header-actions {
-      margin-left: 0;
+    &[data-show="false"]:not(.expanded) {
+      transform: translateY(-5rem);
     }
   }
-
-  @keyframes user-button-fallback-shimmer {
-    0% {
-      background-position: 200% 0;
+  @media (min-width: 800px) {
+    header-component.not-top {
+      margin-inline: 8%;
     }
+  }
+  :global(.dark) header-component.not-top {
+    background-color: hsl(var(--muted) / var(--un-bg-opacity));
+  }
 
-    100% {
-      background-position: -200% 0;
+  @media (max-width: 640px) {
+    #headerExpandContent {
+      grid-template-rows: 0fr;
+      transition:
+        opacity 0.3s,
+        padding 0.3s,
+        border-color 0.15s,
+        grid-template-rows 0.3s;
+    }
+    .expanded #headerExpandContent {
+      grid-template-rows: 1fr;
+    }
+    .expanded.not-top #headerExpandContent {
+      box-shadow:
+        rgb(255, 255, 255) 0px 0px 0px 0px,
+        rgba(24, 24, 27, 0.08) 0px 0px 0px 1px,
+        rgba(39, 39, 42, 0.08) 0px 10px 15px -3px,
+        rgba(39, 39, 42, 0.08) 0px 4px 6px -4px;
+    }
+    header-component #headerExpandContent::after {
+      box-sizing: content-box;
+      content: "";
+      position: absolute;
+      inset-inline: calc(-1rem - 1px);
+      bottom: 0;
+      top: -5rem;
+      z-index: -1;
+      transition: 0.3s;
+      visibility: hidden;
+      opacity: 0;
+      border-bottom: 1px solid transparent;
+    }
+    header-component:not(.not-top) #headerExpandContent::after {
+      visibility: visible;
+      bottom: -1rem;
+      opacity: 1;
+      background-color: hsl(var(--muted) / var(--un-bg-opacity, 1));
+      border-bottom-color: hsl(var(--border) / var(--un-border-opacity, 1));
+    }
+  }
+
+  #toggleDarkMode {
+    &[data-theme="dark"] {
+      & .system {
+        display: none;
+      }
+      & .dark {
+        display: block;
+      }
+    }
+    &[data-theme="light"] {
+      & .system {
+        display: none;
+      }
+      .light {
+        display: block;
+      }
     }
   }
 </style>

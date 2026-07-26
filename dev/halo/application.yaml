@@ -1,0 +1,17 @@
+server:
+  port: ${HALO_PORT:8090}
+
+spring:
+  r2dbc:
+    url: r2dbc:h2:file:///${halo.work-dir}/db/halo-next?MODE=MySQL&DB_CLOSE_ON_EXIT=FALSE
+    username: admin
+    password: halo-local-dev
+  sql:
+    init:
+      mode: always
+      platform: h2
+  thymeleaf:
+    cache: false
+
+halo:
+  external-url: ${HALO_EXTERNAL_URL:http://localhost:8090}

@@ -1,5 +1,7 @@
 declare namespace astroHTML.JSX {
   interface HTMLAttributes {
+    [attribute: `th:${string}`]: string | undefined;
+    [attribute: `xmlns:${string}`]: string | undefined;
     "th:each"?: string;
     "th:href"?: string;
     "th:text"?: string;

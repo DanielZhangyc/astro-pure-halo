@@ -1,0 +1,17 @@
+Astro Pure for Halo
+Copyright 2026 Daniel Zhang
+
+This product includes software and visual design adaptations from
+Astro Theme Pure (https://github.com/cworld1/astro-theme-pure),
+Copyright Pure Lab contributors, licensed under the Apache License 2.0.
+Files adapted from Astro Theme Pure have been modified for Halo 2 template,
+data-source, routing, and plugin compatibility.
+
+This product uses the project structure of Halo Theme Astro Starter
+(https://github.com/halo-sigs/theme-astro-starter).
+
+This product bundles medium-zoom 1.1.0
+(https://github.com/francoischalifour/medium-zoom) and QRCode.js 1.0.0
+(https://github.com/davidshimjs/qrcodejs), both licensed under the MIT
+License, to provide the same article interactions used by Astro Theme Pure
+without a runtime CDN dependency.

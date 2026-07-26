@@ -1,65 +1,127 @@
 ---
+/*
+ * Direct Halo port of Pure src/pages/archives/index.astro.
+ */
+import PureButton from "../components/PureButton.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout pageTitle="归档">
+<Layout>
   <Fragment slot="head">
-    <title th:text="|归档 - ${site.title}|"></title>
+    <title th:text="|Archives • ${site.title}|">
+      Archives • Astro Theme Pure
+    </title>
+    <meta
+      name="description"
+      content="A list of all the years of creating my posts"
+    />
   </Fragment>
 
-  <section class="archive-list" aria-label="Archive list">
-    <th:block th:each="archive : ${archives.items}">
-      <th:block th:each="month : ${archive.months}">
-        <div class="archive-group">
-          <h2
-            class="archive-group__year"
-            th:text="|${archive.year} · ${month.month}|"
-          >
-          </h2>
-          <ul class="archive-group__items">
-            <li th:each="post : ${month.posts}" class="archive-entry">
-              <span
-                class="archive-entry__date"
-                th:text="${#dates.format(post.spec.publishTime, 'MM/dd')}"
-              ></span>
-              <div>
-                <h3 class="archive-entry__title">
-                  <a
-                    th:href="@{${post.status.permalink}}"
-                    th:text="${post.spec.title}"></a>
-                </h3>
-                <p
-                  class="archive-entry__summary"
-                  th:text="${post.status.excerpt}"
+  <PureButton title="Back" href="/" variant="back" />
+
+  <main class="mt-6 lg:mt-10">
+    <div id="content-header" class="animate">
+      <h1 class="mb-6 text-3xl font-medium">Archives</h1>
+    </div>
+
+    <p th:if="${archives.total == 0}">No posts yet.</p>
+
+    <section id="content" class="animate" aria-label="Blog post list">
+      <div
+        th:each="archive : ${archives.items}"
+        th:with="postCount=${#aggregates.sum(archive.months.![posts.size()])}"
+        class="relative mt-20"
+      >
+        <h2
+          class="absolute -start-6 -top-16 z-0 text-9xl font-bold text-transparent opacity-12 dark:opacity-25"
+          style="-webkit-text-stroke-width:2px;-webkit-text-stroke-color:hsl(var(--foreground)/var(--un-text-opacity))"
+        >
+          <samp th:text="${archive.year}">2025</samp>
+        </h2>
+        <p class="px-5 text-muted-foreground">
+          <span th:text="${postCount}">4</span>
+          <span th:text="${postCount gt 1 ? 'posts' : 'post'}">posts</span>
+        </p>
+        <ul class="flex flex-col text-start">
+          <th:block th:each="month : ${archive.months}">
+            <li
+              th:each="post : ${month.posts}"
+              class="post-preview border-0 bg-transparent py-2"
+            >
+              <a
+                class="block w-full relative group rounded-2xl border bg-background transition-colors ease-in-out px-5 py-2.5 hover:bg-muted hover:text-primary"
+                th:href="${post.status.permalink}"
+              >
+                <div
+                  class="relative flex flex-col gap-1 sm:flex-row sm:items-center"
+                  style="z-index:1"
                 >
-                </p>
-              </div>
+                  <span
+                    class="min-w-[95px] text-xs text-muted-foreground font-mono"
+                  >
+                    <time
+                      data-pure-date
+                      th:datetime="${post.spec.publishTime}"
+                      th:text="${#dates.format(post.spec.publishTime, 'MMM d, yyyy')}"
+                    >
+                      Jul 26, 2023
+                    </time>
+                  </span>
+                  <div class="flex justify-between flex-grow">
+                    <div th:text="${post.spec.title}">Article title</div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="preview-redirect my-1 stroke-muted-foreground group-hover:stroke-primary"
+                    >
+                      <line
+                        x1="5"
+                        y1="12"
+                        x2="19"
+                        y2="12"
+                        class="translate-x-4 scale-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1 group-hover:scale-x-100"
+                      >
+                      </line>
+                      <polyline
+                        points="12 5 19 12 12 19"
+                        class="translate-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1"
+                      >
+                      </polyline>
+                    </svg>
+                  </div>
+                </div>
+              </a>
             </li>
-          </ul>
-        </div>
-      </th:block>
-    </th:block>
+          </th:block>
+        </ul>
+      </div>
+    </section>
 
-    <div th:if="${archives.total == 0}" class="archive-empty">暂无文章。</div>
-  </section>
-
-  <nav
-    th:if="${archives.totalPages gt 1}"
-    class="pagination"
-    aria-label="Pagination"
-  >
-    <a
-      th:if="${archives.hasPrevious()}"
-      th:href="@{${archives.prevUrl}}"
-      class="pagination__prev">&larr; 较新</a
+    <nav
+      th:if="${archives.totalPages gt 1}"
+      class="mt-4 flex items-center gap-x-4 sm:mt-6"
+      aria-label="Pagination"
     >
-    <span
-      class="pagination__info"
-      th:text="|${archives.page} / ${archives.totalPages}|"></span>
-    <a
-      th:if="${archives.hasNext()}"
-      th:href="@{${archives.nextUrl}}"
-      class="pagination__next">较旧 &rarr;</a
-    >
-  </nav>
+      <a
+        th:if="${archives.hasPrevious()}"
+        th:href="@{${archives.prevUrl}}"
+        class="me-auto py-2"
+      >
+        ← Previous Posts
+      </a>
+      <a
+        th:if="${archives.hasNext()}"
+        th:href="@{${archives.nextUrl}}"
+        class="ms-auto py-2"
+      >
+        Next Posts →
+      </a>
+    </nav>
+  </main>
 </Layout>

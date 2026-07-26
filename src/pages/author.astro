@@ -1,0 +1,31 @@
+---
+/* Author listing uses Pure's tag-list page without visual alterations. */
+import PureButton from "../components/PureButton.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title th:text="|${author.spec.displayName} • ${site.title}|">
+      Author • Astro Theme Pure
+    </title>
+  </Fragment>
+
+  <PureButton title="Back" href="/archives" variant="back" />
+  <main class="mt-6 lg:mt-10">
+    <div id="content-header" class="animate">
+      <h1 class="mb-6 flex items-end gap-x-2 text-3xl font-medium">
+        Author:
+        <span class="text-2xl" th:text="${author.spec.displayName}">
+          Pure Lab
+        </span>
+      </h1>
+    </div>
+    <section id="content" class="animate" aria-label="Blog post list">
+      <th:block
+        th:replace="~{fragments/post-list :: postList(postItems=${posts.items})}"
+      ></th:block>
+      <th:block th:replace="~{fragments/pagination}"></th:block>
+    </section>
+  </main>
+</Layout>

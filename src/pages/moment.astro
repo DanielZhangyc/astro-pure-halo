@@ -1,0 +1,135 @@
+---
+/*
+ * Halo Moments detail adapter, composed only from Pure's existing content
+ * layout, article metadata, media and comment primitives.
+ */
+import Icon from "../components/Icon.astro";
+import ContentLayout from "../layouts/ContentLayout.astro";
+---
+
+<ContentLayout back="/moments">
+  <Fragment slot="head">
+    <title th:text="|${title} • ${site.title}|">
+      Moment • Astro Theme Pure
+    </title>
+    <meta
+      name="description"
+      th:content="${moment.spec.content.raw}"
+      content="Moment"
+    />
+  </Fragment>
+
+  <Fragment slot="header">
+    <div class="article-info max-lg:mx-auto">
+      <div
+        class="flex flex-wrap gap-x-4 gap-y-2 text-xs leading-6 text-muted-foreground"
+      >
+        <div
+          class="flex items-center gap-1"
+          th:if="${moment.owner != null}"
+        >
+          <img
+            th:if="${not #strings.isEmpty(moment.owner.avatar)}"
+            th:src="${moment.owner.avatar}"
+            th:alt="${moment.owner.displayName}"
+            class="size-5 rounded-full border"
+          />
+          <span th:text="${moment.owner.displayName}">Pure Lab</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <Icon name="calendar" class="size-5" />
+          <time
+            data-pure-date
+            th:datetime="${moment.spec.releaseTime}"
+            th:text="${#dates.format(moment.spec.releaseTime, 'MMM d, yyyy')}"
+          >
+            Jul 26, 2023
+          </time>
+        </div>
+        <span
+          class="flex items-center gap-1"
+          th:if="${not #lists.isEmpty(moment.spec.tags)}"
+        >
+          <Icon name="hashtag" class="size-5" />
+          <th:block th:each="tag, stat : ${moment.spec.tags}">
+            <a th:href="@{/moments(tag=${tag})}" th:text="${tag}">
+              Halo
+            </a>
+            <span th:if="${not stat.last}">/</span>
+          </th:block>
+        </span>
+      </div>
+
+      <h1
+        class="mt-4 text-2xl font-medium sm:mb-2 sm:mt-6 sm:text-3xl"
+        th:text="${title}"
+      >
+        Moments
+      </h1>
+    </div>
+
+    <div class="mt-4 w-1/2 border-t max-md:mx-auto sm:mt-6 sm:w-1/3">
+    </div>
+  </Fragment>
+
+  <div
+    th:if="${not #strings.isEmpty(moment.spec.content.html)}"
+    th:utext="${moment.spec.content.html}"
+  >
+    Moment content
+  </div>
+
+  <div
+    th:if="${not #lists.isEmpty(moment.spec.content.medium)}"
+    class="not-prose mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
+  >
+    <th:block th:each="medium : ${moment.spec.content.medium}">
+      <img
+        th:if="${medium.type.name == 'PHOTO'}"
+        th:src="${medium.url}"
+        alt="Moment image"
+        class="h-auto w-full rounded-xl border object-cover"
+        loading="lazy"
+      />
+      <video
+        th:if="${medium.type.name == 'VIDEO'}"
+        th:src="${medium.url}"
+        class="h-auto w-full rounded-xl border"
+        controls
+        playsinline
+        preload="metadata"
+      >
+      </video>
+      <audio
+        th:if="${medium.type.name == 'AUDIO'}"
+        th:src="${medium.url}"
+        class="w-full"
+        controls
+        preload="metadata"
+      >
+      </audio>
+      <a
+        th:if="${medium.type.name == 'POST'}"
+        th:href="${medium.url}"
+        class="group inline-flex items-center gap-x-1 rounded-lg bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+      >
+        View post →
+      </a>
+    </th:block>
+  </div>
+
+  <Fragment slot="bottom">
+    <section
+      th:if="${(theme.config.post.enable_comments == null or theme.config.post.enable_comments) and haloCommentEnabled}"
+      class="mt-3 sm:mt-6"
+      aria-label="Comments"
+    >
+      <halo:comment
+        group="moment.halo.run"
+        kind="Moment"
+        th:attr="name=${moment.metadata.name}"
+      >
+      </halo:comment>
+    </section>
+  </Fragment>
+</ContentLayout>

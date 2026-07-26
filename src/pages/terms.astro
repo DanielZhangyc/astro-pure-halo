@@ -1,0 +1,143 @@
+---
+import ContentLayout from "../layouts/ContentLayout.astro";
+---
+
+<ContentLayout back="/">
+  <Fragment slot="head">
+    <title th:text="|站点条款 • ${site.title}|">
+      站点条款 • Astro Theme Pure
+    </title>
+    <meta
+      name="description"
+      content="本站的服务条款、隐私说明、版权政策与免责声明。"
+    />
+  </Fragment>
+
+  <Fragment slot="header">
+    <h1 class="text-2xl font-medium sm:mb-2 sm:text-3xl">站点条款</h1>
+    <div class="text-sm text-muted-foreground">
+      生效日期：
+      <time
+        th:text="${#strings.isEmpty(theme.config.pages_terms.effective_date) ? '2026-07-27' : theme.config.pages_terms.effective_date}"
+      >2026-07-27</time>
+    </div>
+  </Fragment>
+
+  <p>
+    欢迎访问 <strong th:text="${site.title}">本网站</strong>。本页面集中说明本网站的使用规则、个人信息处理方式、版权政策和免责声明。请在使用互动功能或提交信息前阅读相关内容。
+  </p>
+
+  <h2 id="scope">一、适用范围与服务</h2>
+  <p>
+    本网站由
+    <strong
+      th:text="${#strings.isEmpty(theme.config.pages_terms.operator) ? site.title : theme.config.pages_terms.operator}"
+    >站点运营者</strong>
+    运营，主要用于发布文章、作品、资料及其他公开内容，并可能提供评论、搜索、订阅、账号或其他互动功能。
+  </p>
+  <p>
+    网站功能可能因维护、升级、网络状况或第三方服务变化而调整、中断或终止。运营者会在合理范围内维护服务，但不保证网站始终不间断、无错误或完全满足特定用途。
+  </p>
+
+  <h2 id="acceptable-use">二、使用规则</h2>
+  <p>使用本网站时，请勿：</p>
+  <ul>
+    <li>发布或传播违反适用法律法规、侵害他人合法权益的内容；</li>
+    <li>冒用他人身份，发布欺诈、骚扰、仇恨、恶意广告或垃圾信息；</li>
+    <li>未经授权尝试访问账号、后台、服务器或其他受保护资源；</li>
+    <li>通过恶意程序、自动化请求或其他方式干扰网站正常运行；</li>
+    <li>未经许可大规模抓取、复制、镜像或商业化利用本站内容。</li>
+  </ul>
+  <p>
+    对涉嫌违法、侵权、危害安全或明显违反上述规则的内容，运营者可以在合理范围内拒绝发布、隐藏或删除，并可限制相关互动。
+  </p>
+
+  <h2 id="privacy">三、隐私与个人信息</h2>
+  <p>
+    本网站按照合法、正当、必要、诚信和最小范围原则处理个人信息，并尽量以清晰方式说明处理目的和范围。
+  </p>
+
+  <h3 id="information-collected">可能处理的信息</h3>
+  <ul>
+    <li>
+      <strong>访问与安全日志：</strong>IP 地址、浏览器和设备信息、访问时间、请求页面、来源页面及错误记录，用于页面传输、故障排查、防止攻击和维护安全。
+    </li>
+    <li>
+      <strong>主动提交的信息：</strong>你在评论、表单或账号功能中填写的昵称、邮箱、网站地址、正文及附件，用于展示内容、回复沟通、发送必要通知或管理互动。
+    </li>
+    <li>
+      <strong>本地存储与 Cookie：</strong>可能用于保存明暗主题偏好、登录状态、安全校验和必要功能。关闭相关存储可能影响部分功能。
+    </li>
+    <li>
+      <strong>统计与第三方请求：</strong>如果站点启用了访问统计、评论、字体、图片、随机名言或社交统计等服务，浏览器可能直接向相应服务提供方发送网络请求。
+    </li>
+  </ul>
+
+  <h3 id="use-and-retention">使用与保存</h3>
+  <p>
+    相关信息仅用于提供和改进网站功能、保障安全、处理互动与请求，以及履行适用的法律义务。除法律另有规定外，信息仅在实现上述目的所需的最短期限内保存；评论等由用户公开提交的内容通常保留至用户申请删除或站点不再需要展示时。
+  </p>
+  <p>
+    本网站不会主动出售个人信息。只有在获得有效授权、为完成用户主动请求所必需、由受托服务提供方按照约定处理，或法律法规要求时，才可能提供必要信息。
+  </p>
+
+  <h3 id="third-parties">第三方服务与外部链接</h3>
+  <p>
+    本网站可能使用 Halo 插件、托管/CDN、评论、统计、邮件、对象存储或其他第三方服务，也可能链接至外部网站。第三方会依据其自身条款和隐私政策处理信息，本网站无法控制其独立行为。访问第三方服务前，请查看其政策。
+  </p>
+
+  <h3 id="your-rights">你的权利</h3>
+  <p>
+    在适用法律规定的范围内，你可以请求查阅、复制、更正、补充或删除个人信息，撤回基于同意的处理，或者对处理规则作出解释说明。为保护账号和信息安全，处理请求前可能需要核验身份。
+  </p>
+
+  <h3 id="minors">未成年人</h3>
+  <p>
+    未满十四周岁的未成年人应在父母或其他监护人指导和同意下使用互动功能，不应自行提交敏感个人信息。若发现相关信息在缺乏适当授权的情况下被提交，请联系运营者处理。
+  </p>
+
+  <h2 id="copyright">四、版权与内容授权</h2>
+  <p>
+    除另有声明外，本站原创文字、图片、代码和其他作品的著作权归相应作者所有。引用、转载或再利用时，应遵守页面标注的许可协议；没有明确许可时，不代表已获得复制、改编、汇编或通过信息网络传播的授权。
+  </p>
+  <p>
+    用户提交的评论或其他内容，其权利仍归原权利人所有；用户同时授权本站为提供互动功能而存储、展示和进行必要的格式调整。请勿提交无权发布的内容。
+  </p>
+  <p>
+    如果你认为本站内容侵犯了合法权利，请提供权利证明、相关页面地址、具体理由和可用联系方式。运营者核实后会依法采取必要措施。
+  </p>
+
+  <h2 id="disclaimer">五、免责声明</h2>
+  <ul>
+    <li>本站内容主要用于一般信息、学习和经验分享，不构成医疗、法律、投资或其他专业意见。</li>
+    <li>内容可能存在时效性、遗漏或错误；在作出重要决定前，请自行核实并咨询具备资质的专业人士。</li>
+    <li>外部链接仅为访问便利而提供，不代表对第三方内容、安全性或持续可用性的认可或担保。</li>
+    <li>在适用法律允许的范围内，因不可抗力、网络故障、第三方服务或用户不当使用造成的损失，由责任方依法承担。</li>
+  </ul>
+
+  <h2 id="changes">六、条款更新</h2>
+  <p>
+    当网站功能、数据处理方式或适用规则发生变化时，本页面可能更新。重要变化会在合理范围内通过页面提示等方式说明，并以页面显示的最新生效日期为准。
+  </p>
+
+  <h2 id="contact">七、联系与请求</h2>
+  <p
+    th:if="${not #strings.isEmpty(theme.config.pages_terms.contact)}"
+  >
+    如需行使个人信息权利、提交侵权通知或询问本条款，请联系：
+    <code th:text="${theme.config.pages_terms.contact}">contact@example.com</code>
+  </p>
+  <p th:if="${#strings.isEmpty(theme.config.pages_terms.contact)}">
+    如需行使个人信息权利、提交侵权通知或询问本条款，请通过本网站公开的联系方式或评论功能联系运营者。
+  </p>
+
+  <div
+    th:if="${not #strings.isEmpty(theme.config.pages_terms.additional_notice)}"
+  >
+    <h2 id="additional-notice">八、补充说明</h2>
+    <p
+      class="whitespace-pre-line"
+      th:text="${theme.config.pages_terms.additional_notice}"
+    ></p>
+  </div>
+</ContentLayout>

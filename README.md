@@ -1,21 +1,6 @@
 # Astro Pure for Halo
 
-本项目是 [Astro Theme Pure](https://github.com/cworld1/astro-theme-pure) 的
-Halo 2 移植版本，旨在保留原主题的页面结构、视觉样式与交互逻辑，并使用 Halo
-提供内容管理、页面路由与插件能力。
-
-## 项目信息
-
-| 项目 | 说明 |
-| --- | --- |
-| 当前版本 | `0.1.4` |
-| Halo 版本 | `>= 2.22.0` |
-| 开发状态 | 开发中 |
-| 上游版本 | Astro Theme Pure 4.1.4 |
-| 开源协议 | Apache License 2.0 |
-
-主题的视觉实现以 Pure 原仓库为基准。Halo 适配仅用于替换数据来源、模板语法、
-页面路由与插件接口。
+本项目是 [Astro Theme Pure](https://github.com/cworld1/astro-theme-pure) 的Halo 移植版本
 
 ## 功能概览
 
@@ -39,17 +24,6 @@ Halo 2 移植版本，旨在保留原主题的页面结构、视觉样式与交�
 | `/about` | 默认 | 是 |
 | `/terms` | Pure 站点条款 | 是 |
 | `/links` | Pure Links | 否 |
-
-页面创建完成后：
-
-1. 在「外观 → 主题 → Astro Pure」中执行一次“重载主题配置”；
-2. 在主题设置中填写首页资料、友链与页脚信息；
-3. 根据需要将页面加入 Halo 菜单。
-
-Search 使用 Halo 自动提供的 `/search` 路由，不需要创建同名独立页面。
-
-About 使用 Halo 默认页面正文。旧版本创建的 Pure About 兼容模板仍可正常渲染，
-但建议将页面模板改回“默认”。
 
 ## 配置说明
 

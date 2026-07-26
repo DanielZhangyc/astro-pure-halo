@@ -1,26 +1,441 @@
 ---
-import Layout from "../layouts/Layout.astro";
+/*
+ * Direct Halo port of Pure's BlogPost, Hero, Copyright and ArticleBottom.
+ */
+import Icon from "../components/Icon.astro";
+import ContentLayout from "../layouts/ContentLayout.astro";
 ---
 
-<Layout contentClass="prose">
+<ContentLayout back="/archives">
   <Fragment slot="head">
-    <title th:text="|${post.spec.title} - ${site.title}|"></title>
+    <title th:text="|${post.spec.title} • ${site.title}|">
+      Article • Astro Theme Pure
+    </title>
+    <meta name="description" th:content="${post.status.excerpt}" />
+    <meta content="article" property="og:type" />
+    <meta th:content="${post.spec.title}" property="og:title" />
+    <meta th:content="${post.status.excerpt}" property="og:description" />
+    <meta
+      th:if="${not #strings.isEmpty(post.spec.cover)}"
+      th:content="${post.spec.cover}"
+      property="og:image"
+    />
   </Fragment>
 
-  <div class="page-heading">
-    <h1 th:text="${post.spec.title}"></h1>
-    <p class="page-meta">
-      <span th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
-      ></span>
-    </p>
-  </div>
+  <Fragment slot="header">
+    <div
+      class="hero-image relative mb-6"
+      th:if="${(theme.config.post.show_cover == null or theme.config.post.show_cover) and not #strings.isEmpty(post.spec.cover)}"
+    >
+      <img
+        th:src="${post.spec.cover}"
+        th:alt="${post.spec.title}"
+        alt="Article cover"
+        class="cover-image relative z-10 h-auto w-full max-w-[65ch] rounded-2xl object-contain"
+        fetchpriority="high"
+        loading="eager"
+      />
+      <img
+        th:src="${post.spec.cover}"
+        alt="Blur image"
+        fetchpriority="high"
+        loading="eager"
+        id="blurImage"
+        class="absolute end-0 top-4 z-0 mt-0 h-full max-w-[65ch] rounded-3xl opacity-60 transition-opacity duration-300"
+      />
+    </div>
 
-  <th:block th:utext="${post.content.content}"></th:block>
+    <div class="article-info max-lg:mx-auto">
+      <div
+        class="flex flex-wrap gap-x-4 gap-y-2 text-xs leading-6 text-muted-foreground"
+      >
+        <div class="flex items-center gap-1">
+          <Icon name="calendar" class="size-5" />
+          <span class="font-sans text-muted-foreground">
+            <time
+              data-pure-date
+              th:datetime="${post.spec.publishTime}"
+              th:text="${#dates.format(post.spec.publishTime, 'MMM d, yyyy')}"
+            >
+              Jul 26, 2023
+            </time>
+          </span>
+        </div>
+        <div class="flex items-center gap-1">
+          <Icon name="time" class="size-5" />
+          <span th:text="|${post.stats.visit} views|">5 min read</span>
+        </div>
+        <span
+          class="flex items-center gap-1"
+          th:if="${not #lists.isEmpty(post.tags)}"
+        >
+          <Icon name="hashtag" class="size-5" />
+          <th:block th:each="tag, stat : ${post.tags}">
+            <a
+              th:href="${tag.status.permalink}"
+              th:text="${tag.spec.displayName}"
+              class="hover:underline hover:underline-offset-4"
+            >
+              Astro
+            </a>
+            <span th:if="${not stat.last}">/</span>
+          </th:block>
+        </span>
+      </div>
 
-  <halo:comment
-    group="content.halo.run"
-    kind="Post"
-    th:attr="name=${post.metadata.name}"
+      <h1
+        class="mt-4 text-2xl font-medium sm:mb-2 sm:mt-6 sm:text-3xl"
+        th:text="${post.spec.title}"
+      >
+        Article title
+      </h1>
+
+      <div
+        class="mt-3 italic"
+        th:if="${not #strings.isEmpty(post.status.excerpt)}"
+      >
+        <blockquote class="text-sm text-muted-foreground">
+          <q th:text="${post.status.excerpt}">Article description</q>
+        </blockquote>
+      </div>
+    </div>
+
+    <div class="mt-4 w-1/2 border-t max-md:mx-auto sm:mt-6 sm:w-1/3">
+    </div>
+  </Fragment>
+
+  <div th:utext="${post.content.content}"></div>
+
+  <Fragment slot="bottom">
+    <div
+      class="relative flex flex-col gap-y-2 rounded-xl border px-3 sm:px-4 py-2 sm:py-3"
+    >
+      <Icon
+        class="absolute end-4 top-4 size-20 opacity-10"
+        name="copyright"
+      />
+
+      <div class="flex flex-col">
+        <div
+          class="font-medium text-foreground"
+          th:text="${post.spec.title}"
+        >
+          Article title
+        </div>
+        <div
+          class="text-sm line-clamp-1"
+          th:text="|${site.url}${post.status.permalink}|"
+        >
+          https://example.com/article
+        </div>
+      </div>
+
+      <div
+        class="flex flex-row flex-wrap justify-start gap-x-5 gap-y-1 sm:gap-x-8"
+      >
+        <div class="flex gap-x-2 sm:flex-col">
+          <span>Author</span>
+          <span
+            class="text-sm text-foreground max-sm:place-self-center"
+            th:text="${post.owner.displayName}"
+          >
+            Pure Lab
+          </span>
+        </div>
+        <div class="flex gap-x-2 sm:min-w-16 sm:flex-col">
+          <span>Published at</span>
+          <span
+            data-pure-date-long
+            th:datetime="${post.spec.publishTime}"
+            class="text-sm text-foreground max-sm:place-self-center"
+            th:text="${#dates.format(post.spec.publishTime, 'MMMM d, yyyy')}"
+          >
+            July 26, 2023
+          </span>
+        </div>
+        <div class="flex gap-x-2 sm:flex-col">
+          <span>Copyright</span>
+          <a
+            class="text-sm text-foreground max-sm:place-self-center"
+            href="https://creativecommons.org/licenses/by/4.0/"
+            target="_blank"
+          >
+            CC BY-NC-SA 4.0
+          </a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <div class="flex flex-row gap-3">
+          <button
+            id="copy-link"
+            aria-label="Copy link"
+            class="group rounded-full bg-muted p-1 text-muted-foreground transition-colors hover:text-primary sm:p-1.5"
+          >
+            <Icon class="size-5" name="link" />
+          </button>
+          <button
+            id="get-qrcode"
+            aria-label="Get QR code"
+            class="group rounded-full bg-muted p-1 text-muted-foreground transition-colors hover:text-primary sm:p-1.5"
+          >
+            <Icon class="size-5" name="qrcode" />
+          </button>
+          <a
+            href="#"
+            data-share="weibo"
+            target="_blank"
+            aria-label="Share to weibo"
+            class="group rounded-full bg-muted p-1 text-muted-foreground transition-colors hover:text-primary sm:p-1.5"
+          >
+            <Icon class="size-5" name="weibo" />
+          </a>
+          <a
+            href="#"
+            data-share="x"
+            target="_blank"
+            aria-label="Share to x"
+            class="group rounded-full bg-muted p-1 text-muted-foreground transition-colors hover:text-primary sm:p-1.5"
+          >
+            <Icon class="size-5" name="x" />
+          </a>
+          <a
+            href="#"
+            data-share="bluesky"
+            target="_blank"
+            aria-label="Share to bluesky"
+            class="group rounded-full bg-muted p-1 text-muted-foreground transition-colors hover:text-primary sm:p-1.5"
+          >
+            <Icon class="size-5" name="bluesky" />
+          </a>
+        </div>
+        <div
+          id="qrcode-container"
+          class="absolute z-10 -mt-2 box-content max-h-0 max-w-44 overflow-hidden rounded-xl border bg-muted p-4 opacity-0 transition-all duration-300 ease-in-out"
+        >
+        </div>
+      </div>
+    </div>
+
+    <nav
+      th:if="${theme.config.post.show_navigation == null or theme.config.post.show_navigation}"
+      th:with="postCursor = ${postFinder.cursor(post.metadata.name)}"
+      class="flex max-sm:flex-col sm:justify-between gap-2 mt-3 sm:mt-6"
+      aria-label="Adjacent articles"
+    >
+      <span class="min-w-0">
+        <a
+          th:if="${postCursor.hasPrevious()}"
+          th:href="${postCursor.previous.status.permalink}"
+          class="group inline-flex items-center gap-x-2 rounded-xl px-4 py-2 no-underline transition-colors duration-300 hover:bg-muted max-sm:max-w-[80%] sm:flex"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="shrink-0 rotate-180 stroke-muted-foreground transition-colors group-hover:stroke-primary"
+          >
+            <line
+              x1="5"
+              y1="12"
+              x2="19"
+              y2="12"
+              class="translate-x-4 scale-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1 group-hover:scale-x-100"
+            >
+            </line>
+            <polyline
+              points="12 5 19 12 12 19"
+              class="translate-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1"
+            >
+            </polyline>
+          </svg>
+          <p
+            class="truncate font-medium transition-colors"
+            th:text="${postCursor.previous.spec.title}"
+          >
+            Previous article
+          </p>
+        </a>
+      </span>
+      <span class="min-w-0">
+        <a
+          th:if="${postCursor.hasNext()}"
+          th:href="${postCursor.next.status.permalink}"
+          class="group inline-flex items-center gap-x-2 rounded-xl px-4 py-2 text-right no-underline transition-colors duration-300 hover:bg-muted max-sm:float-end max-sm:max-w-[80%] sm:flex"
+        >
+          <p
+            class="truncate font-medium transition-colors"
+            th:text="${postCursor.next.spec.title}"
+          >
+            Next article
+          </p>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="shrink-0 stroke-muted-foreground transition-colors group-hover:stroke-primary"
+          >
+            <line
+              x1="5"
+              y1="12"
+              x2="19"
+              y2="12"
+              class="translate-x-4 scale-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1 group-hover:scale-x-100"
+            >
+            </line>
+            <polyline
+              points="12 5 19 12 12 19"
+              class="translate-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1"
+            >
+            </polyline>
+          </svg>
+        </a>
+      </span>
+    </nav>
+
+    <section
+      th:if="${(theme.config.post.enable_comments == null or theme.config.post.enable_comments) and haloCommentEnabled}"
+      class="mt-3 sm:mt-6"
+      aria-label="Comments"
+    >
+      <halo:comment
+        group="content.halo.run"
+        kind="Post"
+        th:attr="name=${post.metadata.name}"
+      >
+      </halo:comment>
+    </section>
+  </Fragment>
+
+  <Fragment slot="scripts">
+  <script
+    is:inline
+    src="/themes/astro-pure-halo/assets/pure/vendor/medium-zoom.min.umd.js"
+    th:if="${theme.config.post.enable_image_zoom == null or theme.config.post.enable_image_zoom}"
   >
-  </halo:comment>
-</Layout>
+  </script>
+  <script is:inline th:if="${theme.config.post.enable_image_zoom == null or theme.config.post.enable_image_zoom}">
+    mediumZoom(".prose img", {
+      background: "hsl(var(--background) / 0.8)",
+    });
+  </script>
+  <script
+    is:inline
+    src="/themes/astro-pure-halo/assets/pure/vendor/qrcode.min.js"
+  >
+  </script>
+  <script is:inline>
+    const renderContent = window.location.href;
+    function loadQRcode(qrcodeContainer) {
+      if (!qrcodeContainer) throw new Error("qrcode container not found");
+      if (qrcodeContainer.innerHTML !== "") return;
+      new QRCode(qrcodeContainer, renderContent);
+    }
+    const pureQRCodeContainer = document.getElementById("qrcode-container");
+    if (!pureQRCodeContainer) throw new Error("qrcode container not found");
+    loadQRcode(pureQRCodeContainer);
+  </script>
+
+  <script>
+    const viewportHeight = window.innerHeight;
+    const thresholds = [
+      viewportHeight / 9,
+      (viewportHeight * 2) / 9,
+      (viewportHeight * 3) / 9,
+    ];
+    const blurImage = document.getElementById("blurImage");
+    if (blurImage) {
+      window.addEventListener(
+        "scroll",
+        () => {
+          const distance = window.scrollY;
+          if (distance >= thresholds[2]) blurImage.style.opacity = "0.15";
+          else if (distance >= thresholds[1])
+            blurImage.style.opacity = "0.3";
+          else if (distance >= thresholds[0])
+            blurImage.style.opacity = "0.45";
+        },
+        { passive: true },
+      );
+    }
+
+    document.getElementById("copy-link")?.addEventListener("click", () => {
+      navigator.clipboard.writeText(window.location.href);
+      document.dispatchEvent(
+        new CustomEvent("pure-toast", {
+          detail: { message: "Link copied!" },
+        }),
+      );
+    });
+
+    const qrContainer = document.getElementById("qrcode-container");
+    document.getElementById("get-qrcode")?.addEventListener("click", () => {
+      qrContainer?.classList.toggle("expanded");
+    });
+
+    const title = document.querySelector("h1")?.textContent || "";
+    document.querySelectorAll<HTMLAnchorElement>("[data-share]").forEach(
+      (link) => {
+        const share = link.dataset.share;
+        if (share === "weibo") {
+          link.href = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(title)}`;
+        } else if (share === "x") {
+          link.href = `https://x.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`;
+        } else {
+          link.href = `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title}\n${window.location.href}`)}`;
+        }
+      },
+    );
+  </script>
+  </Fragment>
+
+  <style>
+    #blurImage {
+      --un-blur: blur(24px);
+      filter: var(--un-blur);
+    }
+    #qrcode-container.expanded {
+      max-height: 11rem;
+      transform: translateY(6px);
+      opacity: 100;
+    }
+    #qrcode-container :global(canvas) {
+      width: 100%;
+    }
+    :global(.medium-zoom-overlay) {
+      position: fixed;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+      will-change: opacity;
+    }
+    :global(.medium-zoom--opened .medium-zoom-overlay) {
+      cursor: zoom-out;
+      opacity: 1;
+      z-index: 999;
+    }
+    :global(.medium-zoom-image) {
+      cursor: zoom-in;
+      transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+    }
+    :global(.medium-zoom-image--hidden) {
+      visibility: hidden;
+    }
+    :global(.medium-zoom-image--opened) {
+      position: relative;
+      cursor: zoom-out;
+      will-change: transform;
+      z-index: 999;
+    }
+  </style>
+</ContentLayout>

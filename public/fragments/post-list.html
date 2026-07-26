@@ -1,19 +1,161 @@
-<ul class="post-feed__list" role="list">
-  <li th:each="post : ${posts.items}" class="post-feed__item">
-    <a class="post-feed__link" th:href="@{${post.status.permalink}}">
-      <div class="post-feed__body">
-        <p
-          class="post-feed__date"
-          th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
-        ></p>
-        <h2 class="post-feed__title" th:text="${post.spec.title}"></h2>
-        <p class="post-feed__excerpt" th:text="${post.status.excerpt}"></p>
-      </div>
+<!--
+  Direct Thymeleaf port of Astro Theme Pure 4.1.4 PostPreview.astro.
+  Only Astro collection access is replaced with Halo post fields.
+-->
+<ul
+  th:fragment="postList(postItems)"
+  class="flex flex-col gap-y-4 text-start"
+>
+  <li
+    th:each="post : ${postItems}"
+    class="post-preview"
+  >
+    <a
+      class="block w-full relative group rounded-2xl border bg-background transition-colors ease-in-out px-5 py-2.5 hover:bg-muted hover:text-primary max-sm:px-4 sm:py-5"
+      th:classappend="${not #strings.isEmpty(post.spec.cover)} ? ' max-md:pt-24'"
+      th:href="@{${post.status.permalink}}"
+    >
       <img
-        th:unless="${#strings.isEmpty(post.spec.cover)}"
-        class="post-feed__image"
+        th:if="${not #strings.isEmpty(post.spec.cover)}"
         th:src="${post.spec.cover}"
+        th:alt="${post.spec.title}"
+        class="cover-image absolute end-0 top-0 z-0 h-2/3 w-full rounded-2xl object-cover opacity-50 transition-opacity duration-300 group-hover:opacity-70 md:h-full md:w-3/5"
+        loading="eager"
       />
+
+      <div class="relative flex flex-col gap-1" style="z-index:1">
+        <span class="min-w-[95px] text-xs text-muted-foreground font-mono">
+          <time
+            data-pure-date
+            th:datetime="${post.spec.publishTime}"
+            th:text="${#dates.format(post.spec.publishTime, 'MMM d, yyyy')}"
+          >
+            Jul 26, 2023
+          </time>
+        </span>
+
+        <div class="flex justify-between flex-grow">
+          <div class="font-medium" th:text="${post.spec.title}">
+            Article title
+          </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="preview-redirect my-1 stroke-muted-foreground group-hover:stroke-primary"
+          >
+            <line
+              x1="5"
+              y1="12"
+              x2="19"
+              y2="12"
+              class="translate-x-4 scale-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1 group-hover:scale-x-100"
+            ></line>
+            <polyline
+              points="12 5 19 12 12 19"
+              class="translate-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1"
+            ></polyline>
+          </svg>
+        </div>
+
+        <p
+          class="line-clamp-2 text-sm text-muted-foreground sm:line-clamp-3"
+          th:classappend="${not #strings.isEmpty(post.spec.cover)} ? ' sm:me-24'"
+          th:text="${post.status.excerpt}"
+        >
+          Article description
+        </p>
+
+        <div
+          class="py-2 flex items-center gap-2 text-sm italic leading-4 text-muted-foreground"
+        >
+          <span class="flex items-center gap-1">
+            <svg
+              aria-hidden="true"
+              class="size-4"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <use href="#pure-icon-time"></use>
+            </svg>
+            <span th:text="|${post.stats.visit} views|">5 min read</span>
+          </span>
+        </div>
+
+        <object
+          th:if="${not #lists.isEmpty(post.tags)}"
+          title="Tags"
+          aria-label="Tags"
+        >
+          <ul class="tag-list mt-1 flex gap-2">
+            <li th:each="tag : ${post.tags}">
+              <a
+                th:href="${tag.status.permalink}"
+                class="group inline-flex items-center gap-x-1 rounded-xl bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+                th:text="${tag.spec.displayName}"
+              >
+                Tag
+              </a>
+            </li>
+          </ul>
+        </object>
+      </div>
     </a>
   </li>
 </ul>
+
+<style>
+  .post-preview {
+    --preview-highlight-final: var(
+      --preview-highlight,
+      hsl(var(--primary) / var(--un-text-opacity, 1))
+    );
+  }
+  .post-preview:hover > a,
+  .post-preview:hover .tag-list a {
+    background-color: var(
+      --preview-highlight-bg,
+      hsl(var(--muted) / var(--un-bg-opacity, 1))
+    ) !important;
+  }
+  .post-preview:hover > a,
+  .post-preview:hover .tag-list a:hover {
+    color: var(--preview-highlight-final) !important;
+  }
+  .post-preview:hover > a .preview-redirect {
+    stroke: var(--preview-highlight-final) !important;
+  }
+  .cover-image {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 1) 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 1) 100%
+    );
+  }
+  @media (max-width: 768px) {
+    .cover-image {
+      -webkit-mask-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 1) 100%
+      );
+      mask-image: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 1) 100%
+      );
+    }
+  }
+</style>

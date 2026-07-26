@@ -1,31 +1,482 @@
 ---
+/*
+ * Direct Halo port of Astro Theme Pure 4.1.4 src/pages/index.astro.
+ * Layout and demo sections intentionally remain identical to upstream.
+ */
+import Icon from "../components/Icon.astro";
+import PureButton from "../components/PureButton.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout>
+<Layout highlightColor="#659EB9">
   <Fragment slot="head">
-    <title th:text="${site.title}"></title>
+    <title th:text="|Home • ${site.title}|">Home • Astro Theme Pure</title>
+    <meta content="Home" property="og:title" />
+    <meta th:content="${site.subtitle}" property="og:description" />
+    <meta content="website" property="og:type" />
   </Fragment>
 
-  <th:block th:replace="~{fragments/post-list}"></th:block>
+  <main class="flex w-full flex-col items-center">
+    <section
+      class="animate mb-10 flex flex-col items-center gap-y-7"
+      id="content-header"
+    >
+      <img
+        src="/themes/astro-pure-halo/assets/pure/avatar.png"
+        th:src="${not #strings.isEmpty(theme.config.home.avatar) ? theme.config.home.avatar : (not #strings.isEmpty(site.logo) ? site.logo : '/themes/astro-pure-halo/assets/pure/avatar.png')}"
+        th:alt="${#strings.isEmpty(theme.config.home.profile_name) ? 'Pure Lab' : theme.config.home.profile_name}"
+        alt="Avatar"
+        class="h-28 w-auto rounded-full border p-1"
+        loading="eager"
+        fetchpriority="high"
+      />
 
-  <nav
-    th:if="${posts.totalPages gt 1}"
-    class="pagination"
-    aria-label="Pagination"
-  >
-    <a
-      th:if="${posts.hasPrevious()}"
-      th:href="@{${posts.prevUrl}}"
-      class="pagination__prev">&larr; 较新</a
+      <div class="flex flex-col items-center gap-y-4">
+        <h1
+          class="text-3xl font-medium"
+          th:text="${#strings.isEmpty(theme.config.home.profile_name) ? 'Pure Lab' : theme.config.home.profile_name}"
+        >
+          Pure Lab
+        </h1>
+        <div class="flex flex-wrap justify-center gap-x-7 gap-y-3">
+          <div class="flex flex-row items-center justify-center gap-x-2">
+            <Icon name="location" class="size-5" />
+            <p th:text="${#strings.isEmpty(theme.config.home.location) ? 'Somewhere' : theme.config.home.location}">Somewhere</p>
+          </div>
+          <a
+            class="flex flex-row items-center justify-center gap-x-2 hover:opacity-75 transition-all"
+            th:href="${#strings.isEmpty(theme.config.home.source_url) ? 'https://github.com/cworld1/astro-theme-pure' : theme.config.home.source_url}"
+            href="https://github.com/cworld1/astro-theme-pure"
+            target="_blank"
+          >
+            <Icon name="github" class="size-5" />
+            <p th:text="${#strings.isEmpty(theme.config.home.source_label) ? 'Source code' : theme.config.home.source_label}">Source code</p>
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+    <div
+      id="content"
+      class="animate flex flex-col gap-y-10 md:w-4/5 lg:w-5/6"
     >
-    <span
-      class="pagination__info"
-      th:text="|${posts.page} / ${posts.totalPages}|"></span>
-    <a
-      th:if="${posts.hasNext()}"
-      th:href="@{${posts.nextUrl}}"
-      class="pagination__next">较旧 &rarr;</a
+      <section class="flex flex-col gap-y-5 md:flex-row md:gap-y-0">
+        <div class="text-xl font-medium md:min-w-36">
+          <h2>About</h2>
+        </div>
+        <div class="flex flex-1 flex-col gap-y-3">
+          <p
+            class="text-muted-foreground"
+            th:text="${#strings.isEmpty(theme.config.home.role) ? 'Developer / Designer' : theme.config.home.role}"
+          >
+            Developer / Designer
+          </p>
+          <p
+            class="text-muted-foreground"
+            th:text="${#strings.isEmpty(theme.config.home.about) ? 'Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem denique mea id. Usu ei regione indoctum dissentiunt, cu meliore fuisset mei, vel quod voluptua ne. Ex dicat impedit mel, at eum oratio possit voluptatum.' : theme.config.home.about}"
+          >
+            Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem denique mea
+            id. Usu ei regione indoctum dissentiunt, cu meliore fuisset mei, vel
+            quod voluptua ne. Ex dicat impedit mel, at eum oratio possit
+            voluptatum.
+          </p>
+          <PureButton
+            title="More about me"
+            class="w-fit self-end"
+            href="/about"
+            variant="ahead"
+          />
+        </div>
+      </section>
+
+      <section
+        class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
+        th:if="${posts.total gt 0}"
+      >
+        <div class="text-xl font-medium md:min-w-36">
+          <h2>Posts</h2>
+        </div>
+        <div class="flex flex-1 flex-col gap-y-3">
+          <ul class="flex flex-col gap-y-1.5 sm:gap-y-2">
+            <li
+              th:each="post : ${posts.items}"
+              class="flex flex-col gap-x-2 sm:flex-row"
+            >
+              <a
+                class="block w-full relative group rounded-2xl border bg-background transition-colors ease-in-out px-5 py-2.5 hover:bg-muted hover:text-primary"
+                th:href="@{${post.status.permalink}}"
+              >
+                <div
+                  class="relative flex flex-col gap-1 sm:flex-row sm:items-center"
+                  style="z-index:1"
+                >
+                  <span class="min-w-[95px] text-xs text-muted-foreground font-mono">
+                    <time
+                      data-pure-date
+                      th:datetime="${post.spec.publishTime}"
+                      th:text="${#dates.format(post.spec.publishTime, 'MMM d, yyyy')}"
+                    >
+                      Jul 26, 2023
+                    </time>
+                  </span>
+                  <div class="flex justify-between flex-grow">
+                    <div th:text="${post.spec.title}">Markdown Syntax Support</div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="preview-redirect my-1 stroke-muted-foreground group-hover:stroke-primary"
+                    >
+                      <line
+                        x1="5"
+                        y1="12"
+                        x2="19"
+                        y2="12"
+                        class="translate-x-4 scale-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1 group-hover:scale-x-100"
+                      >
+                      </line>
+                      <polyline
+                        points="12 5 19 12 12 19"
+                        class="translate-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1"
+                      >
+                      </polyline>
+                    </svg>
+                  </div>
+                </div>
+              </a>
+            </li>
+          </ul>
+          <PureButton
+            title="More posts"
+            class="w-fit self-end"
+            href="/blog"
+            variant="ahead"
+          />
+        </div>
+      </section>
+
+      <section
+          class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
+          th:if="${(theme.config.home.show_education == null or theme.config.home.show_education) and (theme.config.home.education_items == null or not #lists.isEmpty(theme.config.home.education_items))}"
+        >
+          <div class="text-xl font-medium md:min-w-36">
+            <h2>Education</h2>
+          </div>
+          <div class="flex flex-1 flex-col gap-y-3">
+            <a
+              th:if="${theme.config.home.education_items == null}"
+              class="not-prose block relative rounded-2xl border bg-muted px-5 py-3 transition-all hover:border-foreground/25 hover:shadow-sm"
+              href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            >
+              <div class="flex flex-col gap-y-1.5">
+                <div class="flex flex-col gap-y-0.5">
+                  <h2 class="text-lg font-medium">Lorem ipsum</h2>
+                  <p class="text-muted-foreground">
+                    Lorem ipsum dolor sit amet, vidit suscipit at mei.
+                  </p>
+                  <p class="text-muted-foreground">
+                    August 2021 - July 2025
+                  </p>
+                </div>
+              </div>
+            </a>
+            <a
+              th:each="education : ${theme.config.home.education_items}"
+              th:href="${#strings.isEmpty(education.url) ? null : education.url}"
+              class="not-prose block relative rounded-2xl border bg-muted px-5 py-3 transition-all hover:border-foreground/25 hover:shadow-sm"
+            >
+              <div class="flex flex-col gap-y-1.5">
+                <div class="flex flex-col gap-y-0.5">
+                  <h2 class="text-lg font-medium" th:text="${education.title}">
+                    Lorem ipsum
+                  </h2>
+                  <p
+                    class="text-muted-foreground"
+                    th:text="${education.description}"
+                  >
+                    Lorem ipsum dolor sit amet, vidit suscipit at mei.
+                  </p>
+                  <p class="text-muted-foreground" th:text="${education.date}">
+                    August 2021 - July 2025
+                  </p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section
+          class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
+          th:if="${(theme.config.home.show_websites == null or theme.config.home.show_websites) and (theme.config.home.website_items == null or not #lists.isEmpty(theme.config.home.website_items))}"
+        >
+          <div class="text-xl font-medium md:min-w-36">
+            <h2>Website List</h2>
+          </div>
+          <div class="flex flex-1 flex-col gap-y-3">
+            <div
+              class="grid grid-cols-1 gap-3 sm:grid-cols-2"
+              th:if="${theme.config.home.website_items == null}"
+            >
+              {
+                [
+                  {
+                    image: "1.avif",
+                    title: "Lorem ipsum",
+                    subtitle: "Do not go gentle into that good night",
+                    href: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                  },
+                  {
+                    image: "2.avif",
+                    title: "Lorem ipsum",
+                    subtitle: "Old age burn and rave at close of day",
+                    href: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                  },
+                  {
+                    image: "3.avif",
+                    title: "Lorem ipsum",
+                    subtitle: "Rage, rage against the dying of the light",
+                    href: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                  },
+                  {
+                    image: "4.avif",
+                    title: "More projects",
+                    subtitle: "Check out more projects",
+                    href: "/projects",
+                  },
+                ].map((project) => (
+                  <a
+                    class="project-card group overflow-hidden relative flex flex-col justify-end rounded-2xl border bg-muted transition-all hover:border-foreground/25 hover:shadow-sm"
+                    href={project.href}
+                    target="_blank"
+                  >
+                    <img
+                      src={`/themes/astro-pure-halo/assets/pure/projects/${project.image}`}
+                      alt={project.title}
+                      class="absolute w-full h-full object-cover opacity-60 transition-opacity group-hover:opacity-100 dark:opacity-35"
+                      loading="lazy"
+                    />
+                    <div class="project-card-fg z-10 flex flex-col gap-y-0.5 px-5 pb-4 pt-36 transition-all">
+                      <h2 class="text-lg font-medium">{project.title}</h2>
+                      <p class="text-muted-foreground">{project.subtitle}</p>
+                    </div>
+                  </a>
+                ))
+              }
+            </div>
+            <div
+              class="grid grid-cols-1 gap-3 sm:grid-cols-2"
+              th:if="${theme.config.home.website_items != null}"
+            >
+              <a
+                th:each="website : ${theme.config.home.website_items}"
+                th:href="${#strings.isEmpty(website.url) ? null : website.url}"
+                class="project-card group overflow-hidden relative flex flex-col justify-end rounded-2xl border bg-muted transition-all hover:border-foreground/25 hover:shadow-sm"
+                th:target="${#strings.isEmpty(website.url) ? null : '_blank'}"
+              >
+                <img
+                  src="/themes/astro-pure-halo/assets/pure/projects/1.avif"
+                  th:src="${website.image}"
+                  th:alt="${website.title}"
+                  alt="Project"
+                  class="absolute w-full h-full object-cover opacity-60 transition-opacity group-hover:opacity-100 dark:opacity-35"
+                  loading="lazy"
+                />
+                <div
+                  class="project-card-fg z-10 flex flex-col gap-y-0.5 px-5 pb-4 pt-36 transition-all"
+                >
+                  <h2
+                    class="text-lg font-medium"
+                    th:text="${website.title}"
+                  >
+                    Lorem ipsum
+                  </h2>
+                  <p
+                    class="text-muted-foreground"
+                    th:text="${website.subtitle}"
+                  >
+                    Do not go gentle into that good night
+                  </p>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
+          th:if="${(theme.config.home.show_certifications == null or theme.config.home.show_certifications) and (theme.config.home.certification_items == null or not #lists.isEmpty(theme.config.home.certification_items))}"
+        >
+          <div class="text-xl font-medium md:min-w-36">
+            <h2>Certifications</h2>
+          </div>
+          <div class="flex flex-1 flex-col gap-y-3">
+            <a
+              th:if="${theme.config.home.certification_items == null}"
+              class="not-prose block relative rounded-2xl border bg-muted px-5 py-3 transition-all hover:border-foreground/25 hover:shadow-sm"
+              href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            >
+              <div class="flex flex-col gap-y-1.5">
+                <div class="flex flex-col gap-y-0.5">
+                  <h2 class="text-lg font-medium">Lorem ipsum</h2>
+                  <p class="text-muted-foreground">
+                    Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem
+                    denique mea id. Usu ei regione indoctum dissentiunt, cu
+                    meliore fuisset mei, vel quod voluptua ne. Ex dicat impedit
+                    mel, at eum oratio possit voluptatum. Dicat ceteros cu vim.
+                    Impetus fuisset ullamcorper pri cu, his posse iisque ad,
+                    aliquam honestatis usu id.
+                  </p>
+                  <p class="text-muted-foreground">July 2024</p>
+                </div>
+              </div>
+            </a>
+            <a
+              th:each="certification : ${theme.config.home.certification_items}"
+              th:href="${#strings.isEmpty(certification.url) ? null : certification.url}"
+              class="not-prose block relative rounded-2xl border bg-muted px-5 py-3 transition-all hover:border-foreground/25 hover:shadow-sm"
+            >
+              <div class="flex flex-col gap-y-1.5">
+                <div class="flex flex-col gap-y-0.5">
+                  <h2
+                    class="text-lg font-medium"
+                    th:text="${certification.title}"
+                  >
+                    Lorem ipsum
+                  </h2>
+                  <p
+                    class="text-muted-foreground"
+                    th:text="${certification.description}"
+                  >
+                    Lorem ipsum dolor sit amet.
+                  </p>
+                  <p
+                    class="text-muted-foreground"
+                    th:text="${certification.date}"
+                  >
+                    July 2024
+                  </p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section
+          class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
+          th:if="${(theme.config.home.show_skills == null or theme.config.home.show_skills) and (theme.config.home.skill_groups == null or not #lists.isEmpty(theme.config.home.skill_groups))}"
+        >
+          <div class="text-xl font-medium md:min-w-36">
+            <h2>Skills</h2>
+          </div>
+          <div class="flex flex-1 flex-col gap-y-3">
+            <th:block th:if="${theme.config.home.skill_groups == null}">
+              {
+                [
+                  {
+                    title: "Languages",
+                    skills: ["Html", "JavaScript", "CSS", "Shell"],
+                  },
+                  {
+                    title: "Frontend",
+                    skills: ["TypeScript", "Vite", "Webpack", "Astro"],
+                  },
+                  { title: "Backend", skills: ["Vercel", "Waline"] },
+                ].map((group) => (
+                  <div class="flex flex-col gap-y-2 md:flex-row md:gap-x-5 md:gap-y-0">
+                    <h3 class="w-1/5 font-medium">{group.title}</h3>
+                    <div class="flex flex-row flex-wrap gap-x-4 gap-y-2 md:w-4/5">
+                      {group.skills.map((skill) => (
+                        <PureButton as="button" title={skill} variant="pill" />
+                      ))}
+                    </div>
+                  </div>
+                ))
+              }
+            </th:block>
+            <div
+              th:each="skillGroup : ${theme.config.home.skill_groups}"
+              class="flex flex-col gap-y-2 md:flex-row md:gap-x-5 md:gap-y-0"
+            >
+              <h3
+                class="w-1/5 font-medium"
+                th:text="${skillGroup.title}"
+              >
+                Languages
+              </h3>
+              <div class="flex flex-row flex-wrap gap-x-4 gap-y-2 md:w-4/5">
+                <button
+                  th:each="skill : ${#strings.arraySplit(skillGroup.skills, ',')}"
+                  type="button"
+                  class="group inline-flex cursor-default items-center gap-x-1 rounded-xl bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+                >
+                  <p class="my-0" th:text="${#strings.trim(skill)}">Html</p>
+                </button>
+              </div>
+            </div>
+          </div>
+      </section>
+    </div>
+
+    <quote-component
+      th:if="${theme.config.home.show_quote == null or theme.config.home.show_quote}"
+      class="not-prose inline-block mt-12"
     >
-  </nav>
+      <div
+        class="flex flex-row items-center gap-x-3 rounded-full border px-4 py-2 text-sm shadow-sm"
+      >
+        <span class="relative flex items-center justify-center">
+          <span
+            class="absolute size-2 animate-ping rounded-full border border-green-400 bg-green-400 opacity-75"
+          >
+          </span>
+          <span class="size-2 rounded-full bg-green-400"></span>
+        </span>
+        <p id="quote-sentence" class="font-medium text-muted-foreground">
+          Loading...
+        </p>
+      </div>
+    </quote-component>
+  </main>
+
+  <script>
+    class QuoteComponent extends HTMLElement {
+      connectedCallback() {
+        fetch("https://dummyjson.com/quotes/random")
+          .then((response) => response.json())
+          .then((data) => {
+            const quote = this.querySelector("#quote-sentence");
+            if (!quote) return;
+            const sentence = data.quote || "Error";
+            quote.textContent =
+              sentence.length > 80 ? `${sentence.slice(0, 80)}...` : sentence;
+          });
+      }
+    }
+    if (!customElements.get("quote-component")) {
+      customElements.define("quote-component", QuoteComponent);
+    }
+  </script>
+
+  <style>
+    .project-card-fg {
+      --un-gradient-shape: to bottom in oklch;
+      --un-gradient: var(--un-gradient-shape), var(--un-gradient-stops);
+      --un-gradient-from-position: 0%;
+      --un-gradient-from: transparent var(--un-gradient-from-position);
+      --un-gradient-to-position: 80%;
+      --un-gradient-to: hsl(var(--card) / var(--un-to-opacity, 1))
+        var(--un-gradient-to-position);
+      --un-gradient-stops: var(--un-gradient-from), var(--un-gradient-to);
+      background-image: linear-gradient(var(--un-gradient));
+    }
+    .project-card:hover .project-card-fg {
+      --un-gradient-to-position: 100%;
+    }
+  </style>
 </Layout>

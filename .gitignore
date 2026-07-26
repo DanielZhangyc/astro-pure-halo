@@ -24,3 +24,13 @@ pnpm-debug.log*
 .idea/
 
 templates/
+
+# local Halo runtime
+.halo-test/
+
+# local browser test artifacts
+.playwright-cli/
+output/
+
+# upstream source-of-truth clone used for visual parity work
+.reference/

@@ -1,11 +1,26 @@
 {
+  "name": "astro-pure-halo",
+  "version": "0.1.4",
+  "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanielZhangyc/astro-pure-halo.git"
+  },
   "type": "module",
+  "packageManager": "pnpm@11.9.0",
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "nodemon --config nodemon.json --exec 'astro build'",
+    "dev": "./scripts/dev.sh",
+    "theme:watch": "nodemon --config nodemon.json --exec 'astro build'",
     "build": "astro build",
+    "check": "astro check",
+    "halo:download": "./scripts/halo-download.sh",
+    "halo:start": "./scripts/halo-start.sh",
+    "halo:dev": "./scripts/dev.sh",
+    "package": "./scripts/package.sh",
     "astro": "astro",
     "format": "prettier --write ."
   },
@@ -23,20 +38,21 @@
     ]
   },
   "dependencies": {
-    "@astrojs/mdx": "^5.0.3",
-    "@astrojs/rss": "^4.0.18",
-    "@astrojs/vue": "^6.0.1",
-    "@halo-dev/api-client": "^2.23.0",
+    "@unocss/astro": "66.6.8",
     "astro": "^6.1.4",
-    "ky": "^2.0.0",
+    "medium-zoom": "1.1.0",
+    "qrcodejs": "1.0.0",
     "sharp": "^0.34.5",
-    "vue": "^3.5.32"
+    "unocss": "66.6.8"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "@iconify-json/mingcute": "^1.2.7",
+    "@unocss/preset-typography": "66.6.8",
+    "@unocss/reset": "66.6.8",
     "nodemon": "^3.1.14",
     "prettier": "3.8.1",
     "prettier-plugin-astro": "0.14.1",
-    "unplugin-icons": "^23.0.1"
+    "typescript": "^5.9.3"
   }
 }

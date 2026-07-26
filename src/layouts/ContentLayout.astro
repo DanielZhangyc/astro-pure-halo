@@ -1,0 +1,417 @@
+---
+/*
+ * Direct Halo port of Pure's ContentLayout, TOC and BackToTop components.
+ */
+import Icon from "../components/Icon.astro";
+import PureButton from "../components/PureButton.astro";
+import Layout from "./Layout.astro";
+
+interface Props {
+  back?: string;
+}
+
+const { back = "/" } = Astro.props;
+---
+
+<Layout>
+  <slot name="head" slot="head" />
+  <PureButton title="Back" href={back} variant="back" />
+
+  <main class="mt-6 items-start gap-x-10 md:flex">
+    <aside
+      th:if="${theme.config.post.enable_toc == null or theme.config.post.enable_toc}"
+      class="animate top-20 min-w-48 basis-60 overflow-y-scroll max-md:hidden z-40 fixed md:sticky md:order-2 lg:shrink-0 max-md:border max-md:px-4 max-md:py-3 max-md:bg-muted max-md:rounded-xl"
+      style="height:calc(100vh - 7rem);"
+      id="sidebar"
+    >
+      <toc-heading
+        data-toc
+        th:attr="data-toc-style=${#strings.isEmpty(theme.config.post.toc_style) ? 'pure' : theme.config.post.toc_style},data-toc-progress=${theme.config.post.toc_show_progress == null or theme.config.post.toc_show_progress},data-toc-indent=${theme.config.post.toc_indent == null or theme.config.post.toc_indent},data-toc-compact=${theme.config.post.toc_compact != null and theme.config.post.toc_compact}"
+      >
+        <h2
+          class="font-medium"
+          th:text="${#strings.isEmpty(theme.config.post.toc_title) ? 'TABLE OF CONTENTS' : theme.config.post.toc_title}"
+        >
+          TABLE OF CONTENTS
+        </h2>
+        <ul class="mt-4"></ul>
+      </toc-heading>
+      <slot name="sidebar-after" />
+    </aside>
+    <div
+      id="sidebar-shade"
+      class="fixed top-0 start-0 w-full h-full"
+      style="display:none;background-color:#00000091;z-index:31"
+    >
+    </div>
+
+    <article class="min-w-0 grow">
+      <div id="content-header" class="animate">
+        <slot name="header" />
+      </div>
+
+      <div
+        id="content"
+        class="max-w-none animate mt-8 md:min-w-[45ch] overflow-x-hidden prose text-base"
+        data-article-content
+      >
+        <slot />
+      </div>
+    </article>
+  </main>
+
+  <div class="bottom mt-6 items-start gap-x-10 md:flex">
+    <div class="flex-1 text-muted-foreground md:min-w-[50ch]">
+      <slot name="bottom" />
+    </div>
+    <div class="min-w-48 basis-60">
+      <slot name="bottom-sidebar" />
+    </div>
+  </div>
+
+  <div
+    class="z-10 md:z-50 group fixed bottom-8 end-4 transition-all flex flex-col gap-y-4 sm:end-8"
+    id="action-buttons"
+  >
+    <button
+      th:if="${theme.config.post.enable_toc == null or theme.config.post.enable_toc}"
+      aria-label="Toggle sidebar"
+      class="size-10 flex items-center justify-center rounded-full border-2 border-transparent bg-muted text-muted-foreground duration-300 hover:border-border/75 md:hidden sm:size-12"
+      id="sidebar-btn"
+    >
+      <Icon name="list" />
+    </button>
+    <scroll-button>
+      <button
+        aria-label="Back to Top"
+        class="relative size-10 flex items-center justify-center rounded-full border-2 border-transparent bg-muted text-muted-foreground duration-300 hover:border-border/75 sm:size-12 opacity-0"
+        id="to-top-btn"
+      >
+        <div
+          class="top-text absolute bottom-0 end-0 start-0 top-0 flex items-center justify-center group-[.ended]:opacity-0"
+        >
+          <span class="text">10</span>
+          <span class="text-xs">%</span>
+        </div>
+        <Icon name="up" class="top-icon group-[.ended]:opacity-100" />
+      </button>
+    </scroll-button>
+  </div>
+
+  <slot name="scripts" />
+
+  <script>
+    const sidebarButton = document.getElementById("sidebar-btn");
+    const sidebar = document.getElementById("sidebar");
+    const sidebarShade = document.getElementById(
+      "sidebar-shade",
+    ) as HTMLElement;
+
+    function toggleSidebar() {
+      if (sidebar?.classList.contains("show")) {
+        sidebar.classList.remove("show");
+        sidebarShade.style.display = "none";
+      } else if (sidebar) {
+        sidebar.classList.add("show");
+        sidebarShade.style.display = "block";
+      }
+    }
+    sidebarShade?.addEventListener("click", toggleSidebar);
+    sidebarButton?.addEventListener("click", toggleSidebar);
+
+    class HaloPureToc extends HTMLElement {
+      headings: HTMLElement[] = [];
+      links: Array<{
+        element: HTMLAnchorElement;
+        progressBar: HTMLElement;
+        slug: string;
+      }> = [];
+      headingProgress: Record<
+        string,
+        { inView: boolean; progress: number }
+      > = {};
+
+      connectedCallback() {
+        const content = document.getElementById("content");
+        this.headings = Array.from(
+          content?.querySelectorAll<HTMLElement>("h1,h2,h3,h4,h5,h6") || [],
+        );
+        const list = this.querySelector("ul");
+        if (!list || !this.headings.length) {
+          this.closest("aside")?.setAttribute("hidden", "");
+          return;
+        }
+
+        this.headings.forEach((heading, index) => {
+          if (!heading.id) heading.id = `heading-${index + 1}`;
+          const li = document.createElement("li");
+          const wrapper = document.createElement("div");
+          wrapper.className = "relative";
+          const bar = document.createElement("span");
+          bar.className =
+            "absolute top-[5%] w-[2px] rounded transition-colors duration-300";
+          const link = document.createElement("a");
+          link.className =
+            "toc-item line-clamp-2 px-3 py-1 ms-2 text-foreground/75 transition-all hover:text-foreground";
+          if (
+            this.dataset.tocIndent !== "false" &&
+            Number(heading.tagName.slice(1)) > 2
+          ) {
+            link.classList.add("ps-7");
+          }
+          link.href = `#${heading.id}`;
+          link.textContent = (heading.textContent || "").replace(/#$/, "");
+          wrapper.append(bar, link);
+          li.append(wrapper);
+          list.append(li);
+        });
+
+        this.links = Array.from(
+          this.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'),
+        ).map((link) => ({
+          element: link,
+          progressBar: link.previousElementSibling as HTMLElement,
+          slug: (link.getAttribute("href") || "").substring(1),
+        }));
+
+        this.links.forEach((link) => {
+          link.element.addEventListener("click", (event) => {
+            event.preventDefault();
+            const target = this.headings.find(
+              (heading) => heading.id === link.slug,
+            );
+            if (!target) return;
+            history.pushState(null, target.textContent || "", link.element.href);
+            target.scrollIntoView({ behavior: "smooth" });
+          });
+        });
+        this.updatePositionAndStyle();
+        window.setInterval(this.updatePositionAndStyle, 100);
+        window.addEventListener("scroll", this.updatePositionAndStyle, {
+          passive: true,
+        });
+      }
+
+      updatePositionAndStyle = () => {
+        const content = document.getElementById("content");
+        if (!content) return;
+        const windowHeight = window.innerHeight;
+        const pageOffset = window.scrollY - content.offsetTop;
+        const postOffset = content.offsetHeight + 127;
+
+        this.headings.forEach((element, index) => {
+          const nextHeadingTop =
+            this.headings[index + 1]?.offsetTop || postOffset;
+          const range = [
+            element.offsetTop - pageOffset,
+            nextHeadingTop - pageOffset - element.offsetHeight,
+          ];
+          const progress =
+            (windowHeight - range[0]) / (range[1] - range[0] || 1);
+          this.headingProgress[element.id] = {
+            inView: range[0] < windowHeight && range[1] > 0,
+            progress: Math.max(0, Math.min(1, progress)),
+          };
+        });
+
+        this.links.forEach(({ element, progressBar, slug }, index) => {
+          const state = this.headingProgress[slug];
+          if (!state) return;
+          element.classList.toggle("highlight", state.inView);
+          element.classList.toggle("highlight-bg-translucent", state.inView);
+          element.classList.toggle(
+            "rounded-t-2xl",
+            state.inView &&
+              (index === 0 ||
+                !this.headingProgress[this.links[index - 1]?.slug]?.inView),
+          );
+          element.classList.toggle(
+            "rounded-b-2xl",
+            state.inView &&
+              (index === this.links.length - 1 ||
+                !this.headingProgress[this.links[index + 1]?.slug]?.inView),
+          );
+          progressBar.classList.toggle(
+            "is-read",
+            !state.inView && state.progress === 1,
+          );
+          progressBar.classList.toggle("highlight-bg", state.inView);
+          progressBar.style.height = `${state.progress * 90}%`;
+        });
+      };
+    }
+    if (!customElements.get("toc-heading")) {
+      customElements.define("toc-heading", HaloPureToc);
+    }
+
+    class ScrollButton extends HTMLElement {
+      connectedCallback() {
+        const actionButtons = document.getElementById("action-buttons");
+        const button = this.querySelector<HTMLButtonElement>("#to-top-btn");
+        const percentElement = button?.querySelector<HTMLElement>(
+          ".top-text .text",
+        );
+        const header = document.getElementById("content-header");
+        const article = document.getElementById("content");
+        if (!actionButtons || !button || !percentElement || !article) return;
+
+        button.addEventListener("click", () =>
+          window.scrollTo({ top: 0, behavior: "smooth" }),
+        );
+        if (header) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) =>
+              actionButtons.classList.toggle("show", !entry.isIntersecting),
+            );
+          });
+          observer.observe(header);
+        }
+        const update = () => {
+          const scrollTop = Math.max(0, window.scrollY);
+          const maxScrollable =
+            article.scrollHeight - document.documentElement.clientHeight;
+          const percent =
+            scrollTop < article.offsetTop
+              ? 0
+              : maxScrollable <= 0
+                ? 100
+                : Math.round(
+                    (Math.min(
+                      scrollTop - article.offsetTop,
+                      maxScrollable,
+                    ) /
+                      maxScrollable) *
+                      100,
+                  );
+          percentElement.textContent = String(percent);
+          actionButtons.classList.toggle("ended", percent >= 100);
+        };
+        document.addEventListener("scroll", update, { passive: true });
+        update();
+      }
+    }
+    if (!customElements.get("scroll-button")) {
+      customElements.define("scroll-button", ScrollButton);
+    }
+  </script>
+
+  <style>
+    @media (min-width: 769px) {
+      #sidebar-shade {
+        display: none !important;
+      }
+    }
+    @media (max-width: 769px) {
+      aside.show {
+        display: block !important;
+        opacity: 1;
+      }
+      @keyframes fade-in-side {
+        0% {
+          transform: translateX(50%);
+          opacity: 0;
+        }
+        100% {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes fade-in {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      aside {
+        animation: 300ms fade-in-side !important;
+        animation-fill-mode: forwards;
+        right: 0;
+        top: 0 !important;
+        height: 100vh !important;
+        min-width: 40vw !important;
+        max-width: 75vw !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+      }
+      #sidebar-shade {
+        animation: 300ms fade-in;
+      }
+    }
+    @media (max-width: 640px) {
+      aside {
+        min-width: 55vw !important;
+      }
+    }
+
+    toc-heading :global(.toc-item) {
+      display: flow-root;
+    }
+    toc-heading[data-toc-style="pure"] :global(.toc-item.highlight),
+    toc-heading[data-toc-style="text"] :global(.toc-item.highlight) {
+      color: hsl(var(--primary) / 1) !important;
+      font-weight: 500;
+    }
+    toc-heading[data-toc-style="progress"] :global(.toc-item.highlight),
+    toc-heading[data-toc-style="plain"] :global(.toc-item.highlight) {
+      color: hsl(var(--foreground) / 0.75) !important;
+      font-weight: 400;
+    }
+    toc-heading[data-toc-style="pure"]
+      :global(.highlight-bg-translucent) {
+      background-color: hsl(var(--muted) / 1);
+    }
+    toc-heading :global(.highlight-bg) {
+      background-color: hsl(var(--primary) / 1);
+    }
+    toc-heading :global(.is-read) {
+      background-color: hsl(var(--border) / 1);
+    }
+    toc-heading[data-toc-progress="false"] :global(li > div > span) {
+      display: none;
+    }
+    toc-heading[data-toc-style="plain"] :global(li > div > span) {
+      display: none;
+    }
+    toc-heading[data-toc-compact="true"] :global(.toc-item) {
+      padding-top: 0.125rem;
+      padding-bottom: 0.125rem;
+    }
+
+    #action-buttons {
+      transform: translateY(4rem);
+      &.show {
+        transform: translateY(0);
+        & #to-top-btn {
+          opacity: 1;
+        }
+      }
+      & #to-top-btn {
+        & .top-text,
+        & .top-icon {
+          transition-property: opacity;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 150ms;
+        }
+        & .top-text {
+          opacity: 1;
+        }
+        & .top-icon {
+          opacity: 0;
+        }
+      }
+      &.ended #to-top-btn,
+      & #to-top-btn:hover {
+        & .top-text {
+          opacity: 0;
+        }
+        & .top-icon {
+          opacity: 1;
+        }
+      }
+    }
+  </style>
+</Layout>

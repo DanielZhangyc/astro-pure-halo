@@ -1,33 +1,86 @@
 ---
-// TODO: Only execute when compiling Astro templates, so it will not be dynamically updated
-const today = new Date();
+/*
+ * Structure and styling copied from Astro Theme Pure 4.1.4 Footer.astro.
+ */
+import Icon from "./Icon.astro";
 ---
 
-<footer>
-  <div class="footer-inner">
-    <span>
-      &copy; {today.getFullYear()}
-      <th:block th:text="${site.title}"></th:block>.
-    </span>
+<footer class="mx-auto mb-5 mt-16 w-full">
+  <div class="border-t pt-5">
+    <div
+      class="flex items-center gap-y-3 max-sm:flex-col sm:justify-between sm:gap-y-0"
+    >
+      <div
+        class="flex items-center gap-x-4 gap-y-2 text-muted-foreground max-sm:flex-col"
+      >
+        <div
+          th:if="${theme.config.footer.registration != null and not #strings.isEmpty(theme.config.footer.registration)}"
+        >
+          <a
+            th:href="${#strings.isEmpty(theme.config.footer.registration_url) ? null : theme.config.footer.registration_url}"
+            th:target="${#strings.isEmpty(theme.config.footer.registration_url) ? null : '_blank'}"
+            class="text-sm"
+            th:text="${theme.config.footer.registration}"
+          >
+            Moe ICP 114514
+          </a>
+        </div>
+        <div>
+          <span>© </span>
+          <span th:text="${#dates.year(#dates.createNow())}">2026</span>
+          <span
+            th:text="| ${#strings.isEmpty(theme.config.footer.copyright) ? 'Pure Lab' : theme.config.footer.copyright}|"
+          >
+            Pure Lab
+          </span>
+          <th:block
+            th:if="${(theme.config.footer.show_terms == null or theme.config.footer.show_terms) and (theme.config.footer.policy_title == null or not #strings.isEmpty(theme.config.footer.policy_title))}"
+          >
+            <span> &amp; </span>
+            <a
+              th:href="${#strings.isEmpty(theme.config.footer.policy_url) ? '/terms' : theme.config.footer.policy_url}"
+              th:text="${#strings.isEmpty(theme.config.footer.policy_title) ? '站点条款' : theme.config.footer.policy_title}"
+            >
+              站点条款
+            </a>
+          </th:block>
+        </div>
+        <span
+          th:if="${theme.config.footer.show_powered == null or theme.config.footer.show_powered}"
+        >
+          <a href="https://www.halo.run/" target="_blank">Halo</a>
+          &amp;
+          <a
+            href="https://github.com/cworld1/astro-theme-pure"
+            target="_blank">Pure</a
+          >
+          theme powered
+        </span>
+      </div>
+
+      <div class="flex items-center gap-x-4">
+        <a
+          th:if="${theme.config.footer.show_github == null or theme.config.footer.show_github}"
+          href="https://github.com/DanielZhangyc/astro-pure-halo"
+          rel="me"
+        >
+          <span class="sr-only">GitHub</span>
+          <Icon name="github" />
+        </a>
+        <a th:if="${theme.config.footer.show_rss == null or theme.config.footer.show_rss}" href="/rss.xml">
+          <span class="sr-only">RSS</span>
+          <Icon name="rss" />
+        </a>
+      </div>
+    </div>
   </div>
+  <halo:footer></halo:footer>
 </footer>
 
 <style>
-  footer {
-    border-top: 1px solid var(--rule);
-    background: var(--bg);
-  }
-
-  .footer-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 820px;
-    max-width: calc(100% - 2.5rem);
-    margin: 0 auto;
-    padding: 1.5rem 0 2.5rem;
-    color: var(--ink-3);
-    font-size: 0.88rem;
+  footer a {
+    color: hsl(var(--foreground) / var(--un-text-opacity, 1));
+    text-decoration: underline;
+    font-weight: 500;
   }
 </style>

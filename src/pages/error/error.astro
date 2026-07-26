@@ -1,0 +1,40 @@
+---
+/* Generic Halo error with the exact Pure 404 composition. */
+import PureButton from "../../components/PureButton.astro";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title th:text="|${error.status} • ${site.title}|">
+      Error • Astro Theme Pure
+    </title>
+  </Fragment>
+  <div class="px-4 py-10 text-center sm:px-6 lg:px-8">
+    <h1
+      class="block text-7xl font-bold sm:text-9xl"
+      th:text="${error.status}"
+    >
+      500
+    </h1>
+    <p
+      class="mt-3 text-muted-foreground"
+      th:text="${#strings.defaultString(error.title, 'Oops, something went wrong.')}"
+    >
+      Oops, something went wrong.
+    </p>
+    <p
+      class="text-lg"
+      th:if="${not #strings.isEmpty(error.detail)}"
+      th:text="${error.detail}"
+    >
+      Sorry, something went wrong.
+    </p>
+    <PureButton
+      title="Back to home"
+      href="/"
+      variant="ahead"
+      class="mt-5"
+    />
+  </div>
+</Layout>

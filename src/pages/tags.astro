@@ -1,21 +1,45 @@
 ---
+/* Direct Halo port of Pure src/pages/tags/index.astro. */
+import PureButton from "../components/PureButton.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout pageTitle="标签">
+<Layout>
   <Fragment slot="head">
-    <title th:text="|标签 - ${site.title}|"></title>
+    <title th:text="|All Tags • ${site.title}|">
+      All Tags • Astro Theme Pure
+    </title>
+    <meta
+      name="description"
+      content="A list of all the topics written about in posts"
+    />
   </Fragment>
 
-  <div class="tag-cloud" role="list" aria-label="Tag list">
-    <a
-      th:each="tag : ${tags}"
-      class="tag-pill"
-      role="listitem"
-      th:href="@{${tag.status.permalink}}"
-    >
-      <span th:text="${tag.spec.displayName}"></span>
-      <span class="tag-pill__count" th:text="${tag.postCount}"></span>
-    </a>
-  </div>
+  <PureButton title="Back" href="/archives" variant="back" />
+  <main class="mt-6 lg:mt-10">
+    <div id="content-header" class="animate">
+      <h1 class="mb-6 text-3xl font-medium">Tags</h1>
+    </div>
+
+    <div id="content" class="animate">
+      <ul th:if="${not #lists.isEmpty(tags)}" class="flex flex-wrap gap-4">
+        <li th:each="tag : ${tags}">
+          <a
+            th:href="${tag.status.permalink}"
+            class="group inline-flex items-start gap-x-1 rounded-xl bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+            th:classappend="${tag.postCount gt 2 ? ' px-3 py-1 text-xl' : (tag.postCount gt 1 ? ' text-lg' : '')}"
+          >
+            <span th:text="${tag.spec.displayName}">Astro</span>
+            <span
+              th:class="${tag.postCount gt 2 ? 'text-base' : 'text-xs'}"
+              th:text="${tag.postCount}"
+            >
+              3
+            </span>
+          </a>
+        </li>
+      </ul>
+      <p th:if="${#lists.isEmpty(tags)}">Any tag yet.</p>
+    </div>
+  </main>
 </Layout>

@@ -1,18 +1,39 @@
 apiVersion: theme.halo.run/v1alpha1
 kind: Theme
 metadata:
-  name: astro-starter
+  name: astro-pure-halo
 spec:
-  displayName: Astro Starter
+  displayName: Astro Pure
   author:
-    name: Your Name
-    website: https://github.com/YourName
-  description: A starter theme for Halo.
-  logo: https://www.halo.run/logo
-  homepage: https://github.com/halo-sigs/theme-astro-starter
-  issues: https://github.com/halo-sigs/theme-astro-starter/issues
-  version: "1.0.0"
-  requires: ">=2.0.0"
+    name: Daniel Zhang
+    website: https://github.com/DanielZhangyc
+  description: A clean, fast and content-focused Halo theme ported from Astro Theme Pure.
+  homepage: https://github.com/DanielZhangyc/astro-pure-halo
+  repo: https://github.com/DanielZhangyc/astro-pure-halo.git
+  issues: https://github.com/DanielZhangyc/astro-pure-halo/issues
+  settingName: astro-pure-halo-setting
+  configMapName: astro-pure-halo-config
+  customTemplates:
+    page:
+      - name: Pure Blog
+        description: 与 Astro Theme Pure 的 Blog 页面完全一致的文章列表。
+        screenshot:
+        file: blog.html
+      - name: Pure Links
+        description: Pure 原版三类友链、历史记录和申请说明页面。
+        screenshot:
+        file: links.html
+      - name: Pure 站点条款
+        description: 集中展示服务条款、隐私说明、版权和免责声明。
+        screenshot:
+        file: terms.html
+    category:
+      - name: Pure Blog Category
+        description: 与 Astro Theme Pure 的 Blog 页面完全一致的分类文章列表。
+        screenshot:
+        file: category-blog.html
+  version: "0.1.4"
+  requires: ">=2.22.0"
   license:
-    - name: "GPL-3.0"
-      url: "https://www.gnu.org/licenses/gpl-3.0.en.html"
+    - name: "Apache-2.0"
+      url: "https://github.com/DanielZhangyc/astro-pure-halo/blob/main/LICENSE"

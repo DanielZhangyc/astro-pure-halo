@@ -1,22 +1,15 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 
-import vue from "@astrojs/vue";
-import Icons from "unplugin-icons/vite";
+import UnoCSS from "@unocss/astro";
 
 export default defineConfig({
-  base: "/themes/astro-starter",
+  base: "/themes/astro-pure-halo",
   build: {
     assets: "assets",
     format: "file",
   },
   outDir: "./templates",
-  integrations: [vue()],
-  vite: {
-    plugins: [
-      Icons({
-        compiler: "vue3",
-      }),
-    ],
-  },
+  integrations: [UnoCSS({ injectReset: true })],
+  scopedStyleStrategy: "where",
 });

@@ -1,0 +1,208 @@
+---
+interface Friend {
+  avatar?: string;
+  name: string;
+  intro: string;
+  link: string;
+}
+
+interface Props {
+  friends: Friend[];
+  runtimeSource?: string;
+}
+
+const { friends, runtimeSource } = Astro.props;
+const getAvatar = (friend: Friend) => {
+  if (friend.avatar) return friend.avatar;
+  try {
+    return new URL("/favicon.ico", friend.link).href;
+  } catch {
+    return "/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png";
+  }
+};
+---
+
+<friend-list class="grid gap-3.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+  {
+    runtimeSource ? (
+      <>
+        <a
+          th:each={`friend : \${${runtimeSource}}`}
+          th:href="${#strings.isEmpty(friend.link) ? null : friend.link}"
+          th:target="${#strings.isEmpty(friend.link) ? null : '_blank'}"
+          class="no-underline"
+        >
+          <div class="group relative h-full overflow-hidden rounded-2xl border bg-background px-2.5 py-1.5 transition-colors hover:bg-muted sm:px-4 sm:py-2">
+            <div class="relative z-10 flex h-full items-center gap-3">
+              <div class="relative h-14 w-14 min-w-14 overflow-hidden rounded-full">
+                <img
+                  class="my-0 bg-card"
+                  th:src="${#strings.isEmpty(friend.avatar) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png' : friend.avatar}"
+                  th:attr="data-favicon-link=${#strings.isEmpty(friend.avatar) ? friend.link : null}"
+                  src="/themes/astro-pure-halo/assets/pure/avatar.webp"
+                  height="80"
+                  width="80"
+                  alt="avatar"
+                  loading="lazy"
+                />
+                <div class="absolute start-0 top-0 h-full w-full">
+                  <div class="flex h-full w-full items-center justify-center rounded-full bg-foreground opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-50">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="me-2 stroke-background"
+                    >
+                      <line
+                        x1="5"
+                        y1="12"
+                        x2="19"
+                        y2="12"
+                        class="translate-x-4 scale-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1 group-hover:scale-x-100"
+                      />
+                      <polyline
+                        points="12 5 19 12 12 19"
+                        class="translate-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-y-1">
+                <p
+                  class="my-0 line-clamp-1 text-sm"
+                  th:text="${friend.name}"
+                >
+                  Friend
+                </p>
+                <p
+                  class="my-0 line-clamp-1 text-xs text-muted-foreground"
+                  th:text="${friend.intro}"
+                >
+                  Introduction
+                </p>
+              </div>
+            </div>
+            <img
+              class="absolute -start-2 top-0 z-0 my-0 h-full w-2/3 bg-white object-cover opacity-15"
+              th:src="${#strings.isEmpty(friend.avatar) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png' : friend.avatar}"
+              th:attr="data-favicon-link=${#strings.isEmpty(friend.avatar) ? friend.link : null}"
+              src="/themes/astro-pure-halo/assets/pure/avatar.webp"
+              height="80"
+              width="80"
+              alt="avatar bg"
+              loading="lazy"
+              style="mask-image:linear-gradient(to left,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%);-webkit-mask-image:-webkit-linear-gradient(right,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%)"
+            />
+          </div>
+        </a>
+        <p th:if={`\${#lists.isEmpty(${runtimeSource})}`}>Nothing here.</p>
+      </>
+    ) : friends.length > 0 ? (
+      friends.map((friend) => (
+        <a href={friend.link} target="_blank" class="no-underline">
+          <div class="group relative h-full overflow-hidden rounded-2xl border bg-background px-2.5 py-1.5 transition-colors hover:bg-muted sm:px-4 sm:py-2">
+            <div class="relative z-10 flex h-full items-center gap-3">
+              <div class="relative h-14 w-14 min-w-14 overflow-hidden rounded-full">
+                <img
+                  class="my-0 bg-card"
+                  src={getAvatar(friend)}
+                  height="80"
+                  width="80"
+                  alt="avatar"
+                  loading="lazy"
+                />
+                <div class="absolute start-0 top-0 h-full w-full">
+                  <div class="flex h-full w-full items-center justify-center rounded-full bg-foreground opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-50">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="me-2 stroke-background"
+                    >
+                      <line
+                        x1="5"
+                        y1="12"
+                        x2="19"
+                        y2="12"
+                        class="translate-x-4 scale-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1 group-hover:scale-x-100"
+                      />
+                      <polyline
+                        points="12 5 19 12 12 19"
+                        class="translate-x-0 transition-all duration-300 ease-in-out group-hover:translate-x-1"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-y-1">
+                <p class="my-0 line-clamp-1 text-sm">{friend.name}</p>
+                <p class="my-0 line-clamp-1 text-xs text-muted-foreground">
+                  {friend.intro}
+                </p>
+              </div>
+            </div>
+            <img
+              class="absolute -start-2 top-0 z-0 my-0 h-full w-2/3 bg-white object-cover opacity-15"
+              src={getAvatar(friend)}
+              height="80"
+              width="80"
+              alt="avatar bg"
+              loading="lazy"
+              style="mask-image:linear-gradient(to left,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%);-webkit-mask-image:-webkit-linear-gradient(right,rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%)"
+            />
+          </div>
+        </a>
+      ))
+    ) : (
+      <p>Nothing here.</p>
+    )
+  }
+</friend-list>
+
+<script>
+  class PureFriendList extends HTMLElement {
+    connectedCallback() {
+      this.querySelectorAll<HTMLImageElement>("[data-favicon-link]").forEach(
+        (image) => {
+          const link = image.dataset.faviconLink;
+          if (!link) return;
+          try {
+            image.src = new URL("/favicon.ico", link).href;
+          } catch {
+            return;
+          }
+          image.addEventListener(
+            "error",
+            () => {
+              image.src =
+                "/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png";
+            },
+            { once: true },
+          );
+        },
+      );
+
+      const cards = Array.from(this.querySelectorAll(":scope > a"));
+      for (let index = cards.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [cards[index], cards[swapIndex]] = [cards[swapIndex], cards[index]];
+      }
+      cards.forEach((card) => this.append(card));
+    }
+  }
+
+  if (!customElements.get("friend-list")) {
+    customElements.define("friend-list", PureFriendList);
+  }
+</script>

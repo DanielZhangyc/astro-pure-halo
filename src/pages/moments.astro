@@ -1,0 +1,206 @@
+---
+/*
+ * Halo Moments adapter. The route data contract comes from plugin-moments;
+ * every visible primitive is reused from Astro Theme Pure.
+ */
+import Icon from "../components/Icon.astro";
+import PureButton from "../components/PureButton.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title th:text="|${title} • ${site.title}|">
+      Moments • Astro Theme Pure
+    </title>
+    <meta
+      name="description"
+      th:content="|${title} • ${site.subtitle}|"
+      content="Moments"
+    />
+  </Fragment>
+
+  <PureButton title="Back" href="/" variant="back" />
+
+  <main class="mt-6 lg:mt-10">
+    <div id="content-header" class="animate">
+      <h1
+        class="mb-6 mt-6 text-3xl font-medium sm:mt-10"
+        th:text="${title}"
+      >
+        Moments
+      </h1>
+    </div>
+
+    <p th:if="${moments.total eq 0}">No moments yet.</p>
+
+    <div
+      th:if="${moments.total gt 0}"
+      class="grid gap-y-16 sm:grid-cols-[3fr_1fr] sm:gap-x-8"
+    >
+      <section
+        id="content"
+        class="animate"
+        aria-label="Moments list"
+      >
+        <div
+          class="mb-3 flex flex-col justify-between text-sm sm:mb-5 sm:flex-row"
+        >
+          <span
+            class="text-muted-foreground"
+            th:text="|Page ${moments.page} - Showing ${#lists.size(moments.items)} of ${moments.total} moments|"
+          >
+            Page 1 - Showing 10 of 10 moments
+          </span>
+          <a href="/moments/rss.xml">RSS →</a>
+        </div>
+
+        <div class="flex flex-col gap-y-5">
+          <article
+            th:each="moment : ${moments.items}"
+            th:with="content=${moment.spec.content}"
+            class="rounded-2xl border bg-background px-5 py-4"
+          >
+            <header
+              class="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground"
+            >
+              <img
+                th:if="${moment.owner != null and not #strings.isEmpty(moment.owner.avatar)}"
+                th:src="${moment.owner.avatar}"
+                th:alt="${moment.owner.displayName}"
+                class="size-7 rounded-full border"
+                loading="lazy"
+              />
+              <span
+                th:if="${moment.owner != null}"
+                th:text="${moment.owner.displayName}"
+              >
+                Pure Lab
+              </span>
+              <span aria-hidden="true">·</span>
+              <time
+                data-pure-date
+                th:datetime="${moment.spec.releaseTime}"
+                th:text="${#dates.format(moment.spec.releaseTime, 'MMM d, yyyy')}"
+              >
+                Jul 26, 2023
+              </time>
+            </header>
+
+            <div
+              th:if="${not #strings.isEmpty(content.html)}"
+              th:utext="${content.html}"
+              class="prose max-w-none text-base"
+            >
+              Moment content
+            </div>
+
+            <div
+              th:if="${not #lists.isEmpty(content.medium)}"
+              class="not-prose mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
+            >
+              <th:block th:each="medium : ${content.medium}">
+                <img
+                  th:if="${medium.type.name == 'PHOTO'}"
+                  th:src="${medium.url}"
+                  alt="Moment image"
+                  class="h-auto w-full rounded-xl border object-cover"
+                  loading="lazy"
+                />
+                <video
+                  th:if="${medium.type.name == 'VIDEO'}"
+                  th:src="${medium.url}"
+                  class="h-auto w-full rounded-xl border"
+                  controls
+                  playsinline
+                  preload="metadata"
+                >
+                </video>
+                <audio
+                  th:if="${medium.type.name == 'AUDIO'}"
+                  th:src="${medium.url}"
+                  class="w-full"
+                  controls
+                  preload="metadata"
+                >
+                </audio>
+                <a
+                  th:if="${medium.type.name == 'POST'}"
+                  th:href="${medium.url}"
+                  class="group inline-flex items-center gap-x-1 rounded-lg bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+                >
+                  View post →
+                </a>
+              </th:block>
+            </div>
+
+            <footer class="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <div
+                th:if="${not #lists.isEmpty(moment.spec.tags)}"
+                class="flex flex-wrap gap-2"
+              >
+                <a
+                  th:each="tag : ${moment.spec.tags}"
+                  th:href="@{/moments(tag=${tag})}"
+                  class="group inline-flex items-center gap-x-1 rounded-xl bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+                  th:text="|#${tag}|"
+                >
+                  #Halo
+                </a>
+              </div>
+              <a
+                th:href="|/moments/${moment.metadata.name}|"
+                class="ms-auto inline-flex items-center gap-x-1 text-sm"
+              >
+                View details →
+              </a>
+            </footer>
+          </article>
+        </div>
+
+        <nav
+          th:if="${moments.hasPrevious() or moments.hasNext()}"
+          class="mt-4 flex items-center gap-x-4 sm:mt-6"
+          aria-label="Pagination"
+        >
+          <a
+            th:if="${moments.hasPrevious()}"
+            th:href="${moments.prevUrl}"
+            class="me-auto py-2"
+          >
+            ← Previous Moments
+          </a>
+          <a
+            th:if="${moments.hasNext()}"
+            th:href="${moments.nextUrl}"
+            class="ms-auto py-2"
+          >
+            Next Moments →
+          </a>
+        </nav>
+      </section>
+
+      <aside
+        id="sidebar"
+        class="animate"
+        th:if="${not #lists.isEmpty(tags)}"
+      >
+        <h2 class="mb-4 flex items-center text-lg font-medium">
+          <Icon name="tag-2" class="me-2" />
+          Tags
+        </h2>
+        <ul class="text-bgColor flex flex-wrap gap-2">
+          <li th:each="tag : ${tags}">
+            <a
+              th:href="${tag.permalink}"
+              class="group inline-flex items-center gap-x-1 rounded-xl bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+            >
+              <span th:text="${tag.name}">Halo</span>
+              <span th:text="|(${tag.momentCount})|">(1)</span>
+            </a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </main>
+</Layout>

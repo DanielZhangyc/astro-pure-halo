@@ -1,0 +1,292 @@
+<site-search>
+  <aside class="form my-4">
+    <div id="site-search">
+      <div class="pagefind-ui">
+        <form
+          class="pagefind-ui__form"
+          role="search"
+          aria-label="Search this site"
+          action="javascript:void(0);"
+        >
+          <input
+            class="pagefind-ui__search-input"
+            type="text"
+            placeholder="Search this site…"
+            title="Search this site…"
+            autocapitalize="none"
+            enterkeyhint="search"
+          />
+          <button
+            type="button"
+            class="pagefind-ui__search-clear pagefind-ui__suppressed"
+          >
+            Clear
+          </button>
+          <div class="pagefind-ui__drawer pagefind-ui__hidden">
+            <div class="pagefind-ui__results-area">
+              <p class="pagefind-ui__message"></p>
+              <ol class="pagefind-ui__results"></ol>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </aside>
+</site-search>
+
+<script>
+  class PureSiteSearch extends HTMLElement {
+    timer?: ReturnType<typeof setTimeout>;
+    controller?: AbortController;
+
+    connectedCallback() {
+      const input = this.querySelector<HTMLInputElement>(
+        ".pagefind-ui__search-input",
+      );
+      const clear = this.querySelector<HTMLButtonElement>(
+        ".pagefind-ui__search-clear",
+      );
+      const drawer = this.querySelector<HTMLElement>(".pagefind-ui__drawer");
+      const message = this.querySelector<HTMLElement>(".pagefind-ui__message");
+      const results = this.querySelector<HTMLOListElement>(
+        ".pagefind-ui__results",
+      );
+      if (!input || !clear || !drawer || !message || !results) return;
+
+      const safeHighlight = (value = "") => {
+        const span = document.createElement("span");
+        span.textContent = value;
+        return span.innerHTML
+          .replaceAll("&lt;mark&gt;", "<mark>")
+          .replaceAll("&lt;/mark&gt;", "</mark>");
+      };
+
+      const clearSearch = () => {
+        input.value = "";
+        clear.classList.add("pagefind-ui__suppressed");
+        drawer.classList.add("pagefind-ui__hidden");
+        results.replaceChildren();
+        input.blur();
+      };
+
+      clear.addEventListener("click", clearSearch);
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") clearSearch();
+        if (event.key === "Enter") event.preventDefault();
+      });
+      input.addEventListener("input", () => {
+        const keyword = input.value.trim();
+        clear.classList.toggle("pagefind-ui__suppressed", !keyword);
+        clearTimeout(this.timer);
+        this.controller?.abort();
+        if (!keyword) {
+          drawer.classList.add("pagefind-ui__hidden");
+          results.replaceChildren();
+          return;
+        }
+
+        drawer.classList.remove("pagefind-ui__hidden");
+        message.textContent = `Searching for “${keyword}”…`;
+        results.replaceChildren();
+        this.timer = setTimeout(async () => {
+          this.controller = new AbortController();
+          try {
+            const response = await fetch(
+              "/apis/api.halo.run/v1alpha1/indices/-/search",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  keyword,
+                  limit: 20,
+                  highlightPreTag: "<mark>",
+                  highlightPostTag: "</mark>",
+                }),
+                signal: this.controller.signal,
+              },
+            );
+            const data = await response.json();
+            const hits = Array.isArray(data.hits) ? data.hits : [];
+            message.textContent =
+              hits.length === 0
+                ? `No results for “${keyword}”`
+                : hits.length === 1
+                  ? `1 result for “${keyword}”`
+                  : `${hits.length} results for “${keyword}”`;
+            results.innerHTML = hits
+              .map(
+                (hit: {
+                  permalink?: string;
+                  title?: string;
+                  description?: string;
+                  content?: string;
+                }) => `
+                  <li class="pagefind-ui__result">
+                    <div class="pagefind-ui__result-inner">
+                      <p class="pagefind-ui__result-title">
+                        <a class="pagefind-ui__result-link" href="${encodeURI(hit.permalink || "/")}">
+                          ${safeHighlight(hit.title)}
+                        </a>
+                      </p>
+                      <p class="pagefind-ui__result-excerpt">
+                        ${safeHighlight(hit.description || hit.content)}
+                      </p>
+                    </div>
+                  </li>`,
+              )
+              .join("");
+          } catch (error) {
+            if ((error as Error).name !== "AbortError") {
+              message.textContent = "Search failed.";
+            }
+          }
+        }, 300);
+      });
+    }
+  }
+
+  if (!customElements.get("site-search")) {
+    customElements.define("site-search", PureSiteSearch);
+  }
+</script>
+
+<style>
+  #site-search {
+    --pagefind-ui-scale: 0.8;
+    --pagefind-ui-primary: hsl(var(--primary) / var(--un-bg-opacity, 1));
+    --pagefind-ui-text: hsl(var(--foreground) / var(--un-text-opacity, 1));
+    --pagefind-ui-background: hsl(var(--muted) / var(--un-bg-opacity, 1));
+    --pagefind-ui-border: hsl(var(--border) / var(--un-border-opacity, 1));
+    --pagefind-ui-tag: hsl(var(--muted-foreground) / var(--un-text-opacity, 1));
+    --pagefind-ui-border-width: 2px;
+    --pagefind-ui-border-radius: calc(var(--radius) + 2px);
+    --pagefind-ui-image-border-radius: calc(var(--radius) + 2px);
+    --pagefind-ui-image-box-ratio: 3 / 2;
+    --pagefind-ui-font: sans-serif;
+  }
+  .pagefind-ui {
+    width: 100%;
+    color: var(--pagefind-ui-text);
+    font-family: var(--pagefind-ui-font);
+  }
+  .pagefind-ui__hidden {
+    display: none !important;
+  }
+  .pagefind-ui__suppressed {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pagefind-ui__form {
+    position: relative;
+  }
+  .pagefind-ui__form::before {
+    background-color: var(--pagefind-ui-text);
+    width: calc(18px * var(--pagefind-ui-scale));
+    height: calc(18px * var(--pagefind-ui-scale));
+    top: calc(23px * var(--pagefind-ui-scale));
+    left: calc(20px * var(--pagefind-ui-scale));
+    content: "";
+    position: absolute;
+    display: block;
+    opacity: 0.7;
+    mask-image: url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.7549 11.255H11.9649L11.6849 10.985C12.6649 9.845 13.2549 8.365 13.2549 6.755C13.2549 3.165 10.3449 0.255005 6.75488 0.255005C3.16488 0.255005 0.254883 3.165 0.254883 6.755C0.254883 10.345 3.16488 13.255 6.75488 13.255C8.36488 13.255 9.84488 12.665 10.9849 11.685L11.2549 11.965V12.755L16.2549 17.745L17.7449 16.255L12.7549 11.255ZM6.75488 11.255C4.26488 11.255 2.25488 9.245 2.25488 6.755C2.25488 4.26501 4.26488 2.255 6.75488 2.255C9.24488 2.255 11.2549 4.26501 11.2549 6.755C11.2549 9.245 9.24488 11.255 6.75488 11.255Z' fill='%23000000'/%3E%3C/svg%3E%0A");
+    mask-size: 100%;
+    z-index: 9;
+    pointer-events: none;
+  }
+  .pagefind-ui__search-input {
+    height: calc(64px * var(--pagefind-ui-scale));
+    padding: 0 calc(70px * var(--pagefind-ui-scale)) 0
+      calc(54px * var(--pagefind-ui-scale));
+    background-color: var(--pagefind-ui-background);
+    border: var(--pagefind-ui-border-width) solid var(--pagefind-ui-border);
+    border-radius: var(--pagefind-ui-border-radius);
+    font-size: calc(21px * var(--pagefind-ui-scale));
+    position: relative;
+    appearance: none;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    font-weight: 700;
+  }
+  .pagefind-ui__search-input::placeholder {
+    opacity: 0.2;
+  }
+  .pagefind-ui__search-clear {
+    position: absolute;
+    top: calc(3px * var(--pagefind-ui-scale));
+    right: calc(3px * var(--pagefind-ui-scale));
+    height: calc(58px * var(--pagefind-ui-scale));
+    padding: 0 calc(15px * var(--pagefind-ui-scale)) 0
+      calc(2px * var(--pagefind-ui-scale));
+    color: var(--pagefind-ui-text);
+    font-size: calc(14px * var(--pagefind-ui-scale));
+    cursor: pointer;
+    background-color: var(--pagefind-ui-background);
+    border-radius: var(--pagefind-ui-border-radius);
+  }
+  .pagefind-ui__drawer {
+    gap: calc(60px * var(--pagefind-ui-scale));
+    display: flex;
+    flex-flow: row wrap;
+  }
+  .pagefind-ui__results-area {
+    min-width: min(calc(400px * var(--pagefind-ui-scale)), 100%);
+    flex: 1000;
+    margin-top: calc(20px * var(--pagefind-ui-scale));
+  }
+  .pagefind-ui__results {
+    padding: 0;
+  }
+  .pagefind-ui__message {
+    box-sizing: content-box;
+    font-size: calc(16px * var(--pagefind-ui-scale));
+    height: calc(24px * var(--pagefind-ui-scale));
+    padding: calc(20px * var(--pagefind-ui-scale)) 0;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    margin-top: 0;
+  }
+  :global(.pagefind-ui__result) {
+    list-style-type: none;
+    display: flex;
+    align-items: flex-start;
+    gap: min(calc(40px * var(--pagefind-ui-scale)), 3%);
+    padding: calc(30px * var(--pagefind-ui-scale)) 0
+      calc(40px * var(--pagefind-ui-scale));
+    border-top: solid var(--pagefind-ui-border-width) var(--pagefind-ui-border);
+  }
+  :global(.pagefind-ui__result:last-of-type) {
+    border-bottom: solid var(--pagefind-ui-border-width)
+      var(--pagefind-ui-border);
+  }
+  :global(.pagefind-ui__result-inner) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: calc(10px * var(--pagefind-ui-scale));
+  }
+  :global(.pagefind-ui__result-title) {
+    display: inline-block;
+    font-weight: 700;
+    font-size: calc(21px * var(--pagefind-ui-scale));
+    margin: 0;
+  }
+  :global(.pagefind-ui__result-link) {
+    color: var(--pagefind-ui-text);
+    text-decoration: none;
+  }
+  :global(.pagefind-ui__result-link:hover) {
+    text-decoration: underline;
+  }
+  :global(.pagefind-ui__result-excerpt) {
+    display: inline-block;
+    font-weight: 400;
+    font-size: calc(16px * var(--pagefind-ui-scale));
+    margin-top: calc(4px * var(--pagefind-ui-scale));
+    margin-bottom: 0;
+    min-width: calc(250px * var(--pagefind-ui-scale));
+  }
+</style>

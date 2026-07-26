@@ -8,6 +8,7 @@ spec:
     name: Daniel Zhang
     website: https://github.com/DanielZhangyc
   description: A clean, fast and content-focused Halo theme ported from Astro Theme Pure.
+  logo: /themes/astro-pure-halo/assets/pure/theme-logo.png
   homepage: https://github.com/DanielZhangyc/astro-pure-halo
   repo: https://github.com/DanielZhangyc/astro-pure-halo.git
   issues: https://github.com/DanielZhangyc/astro-pure-halo/issues

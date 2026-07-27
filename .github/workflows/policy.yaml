@@ -1,0 +1,28 @@
+name: Policy
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+permissions:
+  contents: read
+
+jobs:
+  pull-request:
+    name: PR policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout all history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Fetch integration branch
+        run: git fetch --no-tags origin dev:refs/remotes/origin/dev
+      - name: Validate branch and version policy
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          INTEGRATION_SHA: ${{ github.event.pull_request.base.ref == 'main' && 'origin/dev' || '' }}
+        run: node scripts/verify-pr-policy.mjs

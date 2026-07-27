@@ -1,0 +1,39 @@
+name: CD
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release-policy:
+    name: Release policy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - name: Fetch main
+        run: git fetch --no-tags origin main:refs/remotes/origin/main
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node scripts/verify-release-tag.mjs
+
+  cd:
+    name: Halo theme
+    needs: release-policy
+    uses: halo-sigs/reusable-workflows/.github/workflows/theme-cd.yaml@v4
+    permissions:
+      contents: write
+    with:
+      node-version: "24"
+      pnpm-version: ""
+      # First publish only to GitHub Releases. After the app passes its initial
+      # review, replace this with app-id and the HALO_PAT secret described in
+      # docs/RELEASE_WORKFLOW.md.
+      skip-appstore-release: true

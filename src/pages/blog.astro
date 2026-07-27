@@ -20,7 +20,9 @@ import Layout from "../layouts/Layout.astro";
   </Fragment>
 
   <th:block
-    th:with="purePageSize=${theme.config.content.blog_page_size == null or theme.config.content.blog_page_size lt 1 ? 8 : theme.config.content.blog_page_size},
+    th:with="purePageSizeValue=${theme.config.content.blog_page_size},
+             purePageSizeText=${purePageSizeValue == null ? '' : purePageSizeValue.toString()},
+             purePageSize=${purePageSizeText.matches('^(?:[1-9]|[1-9][0-9]|100)$') ? purePageSizeText : '8'},
              pureRequestedPage=${not #lists.isEmpty(param.page) and param.page[0].matches('^[1-9][0-9]{0,5}$') ? param.page[0] : 1},
              requestedPosts=${postFinder.list({page: pureRequestedPage, size: purePageSize})},
              blogPosts=${requestedPosts.total gt 0 and #lists.isEmpty(requestedPosts.items) ? postFinder.list({page: requestedPosts.totalPages, size: purePageSize}) : requestedPosts},

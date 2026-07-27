@@ -10,6 +10,15 @@ data-source, routing, and plugin compatibility.
 This product uses the project structure of Halo Theme Astro Starter
 (https://github.com/halo-sigs/theme-astro-starter).
 
+The upstream project loads the Satoshi font from Fontshare. Satoshi is
+governed by the ITF Free Font License, which does not permit this project to
+redistribute the font files in a Halo theme archive. This product therefore
+does not bundle Satoshi.
+
+This product bundles IBM Plex Sans 1.1.0, Copyright IBM Corp., licensed under
+the SIL Open Font License 1.1. The complete license is included at
+templates/assets/pure/vendor/LICENSE-ibm-plex in the theme archive.
+
 This product bundles medium-zoom 1.1.0
 (https://github.com/francoischalifour/medium-zoom) and QRCode.js 1.0.0
 (https://github.com/davidshimjs/qrcodejs), both licensed under the MIT

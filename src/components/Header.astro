@@ -38,6 +38,7 @@ import Icon from "./Icon.astro";
             th:each="menuItem : ${menu.menuItems}"
             th:href="@{${menuItem.status.href}}"
             th:target="${menuItem.spec.target?.value}"
+            rel="noopener noreferrer"
             th:text="${menuItem.status.displayName}"
             class="w-full flex-none grow py-2 text-right font-medium transition-none hover:text-primary sm:w-fit sm:px-3"
             aria-label="Nav menu item"
@@ -45,7 +46,9 @@ import Icon from "./Icon.astro";
             Blog
           </a>
         </nav>
-        <div class="flex w-full grow flex-row justify-end gap-x-3 sm:w-fit sm:gap-x-5">
+        <div
+          class="flex w-full grow flex-row justify-end gap-x-3 sm:w-fit sm:gap-x-5"
+        >
           <a
             th:if="${theme.config.header.show_search == null or theme.config.header.show_search}"
             class="px-1 py-2 transition-none sm:px-2"
@@ -144,11 +147,9 @@ import Icon from "./Icon.astro";
       };
 
       updateHeader();
-      window.addEventListener(
-        "scroll",
-        () => updateHeader(),
-        { passive: true },
-      );
+      window.addEventListener("scroll", () => updateHeader(), {
+        passive: true,
+      });
       window.addEventListener("pageshow", () => updateHeader());
 
       const darkModeBtn = this.querySelector<HTMLElement>("#toggleDarkMode");

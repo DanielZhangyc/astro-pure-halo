@@ -36,10 +36,11 @@ import Icon from "./Icon.astro";
           <a
             th:href="${#strings.isEmpty(theme.config.footer.registration_url) ? null : theme.config.footer.registration_url}"
             th:target="${#strings.isEmpty(theme.config.footer.registration_url) ? null : '_blank'}"
+            rel="noopener noreferrer"
             class="text-sm"
             th:text="${theme.config.footer.registration}"
           >
-            Moe ICP 114514
+            Registration information
           </a>
         </div>
         <div>
@@ -51,9 +52,9 @@ import Icon from "./Icon.astro";
           </span>
           <span th:text="${#dates.year(#dates.createNow())}">2026</span>
           <span
-            th:text="| ${#strings.isEmpty(theme.config.footer.copyright) ? 'Pure Lab' : theme.config.footer.copyright}|"
+            th:text="| ${#strings.isEmpty(theme.config.footer.copyright) ? site.title : theme.config.footer.copyright}|"
           >
-            Pure Lab
+            Site title
           </span>
           <th:block
             th:if="${(theme.config.footer.show_terms == null or theme.config.footer.show_terms) and (theme.config.footer.policy_title == null or not #strings.isEmpty(theme.config.footer.policy_title))}"
@@ -87,10 +88,16 @@ import Icon from "./Icon.astro";
         <span
           th:if="${theme.config.footer.show_powered == null or theme.config.footer.show_powered}"
         >
-          <a href="https://www.halo.run/" target="_blank">Halo</a>
+          <a
+            href="https://www.halo.run/"
+            target="_blank"
+            rel="noopener noreferrer">Halo</a
+          >
           &amp;
-          <a href="https://github.com/cworld1/astro-theme-pure" target="_blank"
-            >Pure</a
+          <a
+            href="https://github.com/cworld1/astro-theme-pure"
+            target="_blank"
+            rel="noopener noreferrer">Pure</a
           >
           theme powered
         </span>

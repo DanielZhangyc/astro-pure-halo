@@ -1,0 +1,145 @@
+---
+/*
+ * Halo Photos adapter. plugin-photos owns the /photos route and injects the
+ * groups, photos, photoUrl and title model used by this template.
+ */
+import Layout from "../layouts/Layout.astro";
+import PureButton from "../components/PureButton.astro";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title
+      th:text="|${title} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
+      Photos • Astro Theme Pure
+    </title>
+    <meta
+      name="description"
+      th:content="|${title} • ${site.subtitle}|"
+      content="Photos"
+    />
+  </Fragment>
+
+  <PureButton title="Back" href="/" variant="back" />
+
+  <main class="mt-6 lg:mt-10">
+    <header id="content-header" class="animate">
+      <h1 class="mb-2 mt-6 text-3xl font-medium sm:mt-10" th:text="${title}">
+        Photos
+      </h1>
+      <p
+        class="text-sm text-muted-foreground"
+        th:text="|${photos.total} photos|"
+      >
+        0 photos
+      </p>
+    </header>
+
+    <nav
+      th:if="${groups != null and not #lists.isEmpty(groups)}"
+      class="animate mt-6 flex flex-wrap gap-2"
+      aria-label="Photo groups"
+    >
+      <a
+        th:href="@{${photoUrl.list()}}"
+        class="rounded-xl border bg-muted px-3 py-1.5 text-sm text-muted-foreground no-underline transition-colors hover:bg-card"
+      >
+        All
+      </a>
+      <a
+        th:each="item : ${groups}"
+        th:href="@{${photoUrl.list(item.metadata.name)}}"
+        class="rounded-xl border bg-muted px-3 py-1.5 text-sm text-muted-foreground no-underline transition-colors hover:bg-card"
+      >
+        <span th:text="${item.spec.displayName}">Group</span>
+        <span
+          th:if="${item.status != null}"
+          class="ms-1 opacity-70"
+          th:text="|(${item.status.photoCount})|"
+        >
+          (0)
+        </span>
+      </a>
+    </nav>
+
+    <p class="animate mt-8" th:if="${photos.total eq 0}">No photos yet.</p>
+
+    <section
+      th:if="${photos.total gt 0}"
+      class="animate mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+      aria-label="Photo gallery"
+    >
+      <article
+        th:each="photo : ${photos.items}"
+        class="group overflow-hidden rounded-2xl border bg-background"
+      >
+        <a
+          th:href="@{${photoUrl.detail(photo)}}"
+          class="block overflow-hidden no-underline"
+        >
+          <img
+            th:src="${#strings.isEmpty(photo.spec.cover) ? photo.spec.url : photo.spec.cover}"
+            th:alt="${photo.spec.displayName}"
+            class="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            loading="lazy"
+          />
+          <div class="px-4 py-3">
+            <h2
+              class="line-clamp-1 text-base font-medium"
+              th:text="${photo.spec.displayName}"
+            >
+              Photo
+            </h2>
+            <p
+              th:if="${not #strings.isEmpty(photo.spec.description)}"
+              class="mt-1 line-clamp-2 text-sm text-muted-foreground"
+              th:text="${photo.spec.description}"
+            >
+              Photo description
+            </p>
+            <div
+              th:if="${not #lists.isEmpty(photo.spec.tags)}"
+              class="mt-3 flex flex-wrap gap-1.5"
+            >
+              <span
+                th:each="tag : ${photo.spec.tags}"
+                class="rounded-lg bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                th:text="|#${tag}|"
+              >
+                #photo
+              </span>
+            </div>
+          </div>
+        </a>
+      </article>
+    </section>
+
+    <nav
+      th:if="${photos.hasPrevious() or photos.hasNext()}"
+      class="animate mt-6 flex items-center gap-x-4"
+      aria-label="Pagination"
+    >
+      <a
+        th:if="${photos.hasPrevious()}"
+        th:href="@{${photos.prevUrl}}"
+        class="me-auto py-2"
+      >
+        ← Previous Photos
+      </a>
+      <span
+        class="text-sm text-muted-foreground"
+        th:text="|${photos.page} / ${photos.totalPages}|"
+      >
+        1 / 1
+      </span>
+      <a
+        th:if="${photos.hasNext()}"
+        th:href="@{${photos.nextUrl}}"
+        class="ms-auto py-2"
+      >
+        Next Photos →
+      </a>
+    </nav>
+  </main>
+</Layout>

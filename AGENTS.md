@@ -71,6 +71,8 @@
   区块，不得擅自覆盖、回滚或提交用户的其他改动。
 - `main` 是只包含可发布版本的稳定分支；`dev` 是日常开发的集成分支。普通功能、
   修复、文档和重构分支必须从 `dev` 创建，并通过 Pull Request 合入 `dev`。
+- 日常分支使用 `feature/*`、`fix/*`、`docs/*`、`refactor/*` 等有意义的前缀；
+  兼容已有的 `feat/*` 分支，但新功能优先使用 `feature/*`。
 - 普通开发分支不得修改 `package.json` 或 `theme.yaml` 中的版本号。准备发布时，
   从最新 `dev` 创建 `release/vX.Y.Z`，在该分支统一更新版本号和
   `CHANGELOG.md`，再通过 Pull Request 合入 `main`。
@@ -83,7 +85,8 @@
   Pull Request、线性历史、必选状态检查、禁止删除和禁止强制推送。
 - `main` 只能接收 `release/vX.Y.Z` 或 `hotfix/vX.Y.Z`；该限制由仓库中的
   Pull Request policy 检查强制执行。合入 `main` 后，以同版本 `vX.Y.Z` 创建
-  GitHub Release，由 Halo 官方 CD 工作流构建并发布制品。
+  GitHub Release；版本由发布分支中的 `package.json`、`theme.yaml` 和分支名
+  共同确定，仓库 Release 工作流负责自动构建并上传制品。
 - 仓库只允许 Squash merge，避免功能分支的临时提交和 merge commit 进入长期
   分支。提交信息使用清晰、可独立回滚的祈使句。
 - “提交”“发布”或“完成”等一般指令均不构成绕过分支规则、直接合并 Pull

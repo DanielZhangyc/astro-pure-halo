@@ -5,6 +5,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- 增加由 `main` 成功 CI 自动创建同版本 GitHub Release 和上传主题 ZIP 的流程，
+  同时支持维护者从 Actions 页面输入版本号进行幂等重试。
+
 ## [0.1.7] - 2026-07-27
 
 ### Added

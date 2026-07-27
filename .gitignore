@@ -23,6 +23,11 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
+# local AI agent instructions
+/AGENTS.md
+/CLAUDE.md
+/GEMINI.md
+
 templates/
 
 # local Halo runtime

@@ -122,3 +122,19 @@ jobs:
               --generate-notes \
               --latest
           fi
+      - name: Resolve GitHub release
+        id: github-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.id')"
+          echo "id=${release_id}" >> "${GITHUB_OUTPUT}"
+      - name: Publish to Halo App Store
+        uses: halo-sigs/app-store-release-action@v4
+        with:
+          github-token: ${{ github.token }}
+          app-id: app-gefdnac7
+          release-id: ${{ steps.github-release.outputs.id }}
+          assets-dir: dist
+          halo-pat: ${{ secrets.HALO_PAT }}

@@ -1,0 +1,182 @@
+---
+/*
+ * Halo Photos detail adapter. plugin-photos owns /photos/{name} and injects
+ * the photo, navigation context, EXIF data and comment source.
+ */
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title
+      th:text="|${title} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
+      Photo • Astro Theme Pure
+    </title>
+    <meta
+      name="description"
+      th:content="${#strings.isEmpty(photo.spec.description) ? title : photo.spec.description}"
+      content="Photo"
+    />
+    <meta property="og:image" th:content="${photo.spec.url}" />
+  </Fragment>
+
+  <a
+    th:href="${backUrl}"
+    class="group inline-flex items-center gap-x-1 rounded-lg border bg-muted px-2 py-1 text-sm text-muted-foreground no-underline transition-all hover:bg-card"
+  >
+    <span aria-hidden="true">←</span>
+    <span>Back to photos</span>
+  </a>
+
+  <main class="mt-6 lg:mt-10">
+    <header id="content-header" class="animate">
+      <div
+        class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2"
+      >
+        <h1 class="text-2xl font-medium sm:text-3xl" th:text="${title}">
+          Photo
+        </h1>
+        <span
+          class="text-sm text-muted-foreground"
+          th:text="|${position} / ${total}|"
+        >
+          1 / 1
+        </span>
+      </div>
+      <p
+        th:if="${not #strings.isEmpty(photo.spec.description)}"
+        class="mt-3 max-w-3xl text-muted-foreground"
+        th:text="${photo.spec.description}"
+      >
+        Photo description
+      </p>
+    </header>
+
+    <figure class="animate mt-8">
+      <a
+        th:href="${photo.spec.url}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="block overflow-hidden rounded-2xl border bg-muted"
+        title="Open original image"
+      >
+        <img
+          th:src="${photo.spec.url}"
+          th:alt="${photo.spec.displayName}"
+          class="mx-auto max-h-[75vh] w-auto max-w-full object-contain"
+        />
+      </a>
+    </figure>
+
+    <div
+      th:if="${not #lists.isEmpty(photo.spec.tags)}"
+      class="animate mt-5 flex flex-wrap gap-2"
+      aria-label="Photo tags"
+    >
+      <span
+        th:each="tag : ${photo.spec.tags}"
+        class="rounded-xl border bg-muted px-2 py-1 text-sm text-muted-foreground"
+        th:text="|#${tag}|"
+      >
+        #photo
+      </span>
+    </div>
+
+    <dl
+      th:if="${photo.exif != null}"
+      class="animate mt-6 grid grid-cols-2 gap-x-6 gap-y-4 rounded-2xl border bg-muted/40 p-5 text-sm sm:grid-cols-3 lg:grid-cols-6"
+    >
+      <div
+        th:if="${not #strings.isEmpty(photo.exif.make) or not #strings.isEmpty(photo.exif.model)}"
+      >
+        <dt class="text-muted-foreground">Camera</dt>
+        <dd
+          class="mt-1"
+          th:text="|${photo.exif.make ?: ''} ${photo.exif.model ?: ''}|"
+        >
+          Camera
+        </dd>
+      </div>
+      <div th:if="${not #strings.isEmpty(photo.exif.lensModel)}">
+        <dt class="text-muted-foreground">Lens</dt>
+        <dd class="mt-1" th:text="${photo.exif.lensModel}">Lens</dd>
+      </div>
+      <div th:if="${photo.exif.fNumber != null}">
+        <dt class="text-muted-foreground">Aperture</dt>
+        <dd class="mt-1" th:text="|f/${photo.exif.fNumber}|">f/1.8</dd>
+      </div>
+      <div th:if="${not #strings.isEmpty(photo.exif.exposureTime)}">
+        <dt class="text-muted-foreground">Shutter</dt>
+        <dd class="mt-1" th:text="${photo.exif.exposureTime}">1/200</dd>
+      </div>
+      <div th:if="${photo.exif.iso != null}">
+        <dt class="text-muted-foreground">ISO</dt>
+        <dd class="mt-1" th:text="${photo.exif.iso}">100</dd>
+      </div>
+      <div th:if="${photo.exif.focalLength != null}">
+        <dt class="text-muted-foreground">Focal length</dt>
+        <dd class="mt-1" th:text="|${photo.exif.focalLength} mm|">50 mm</dd>
+      </div>
+    </dl>
+
+    <nav
+      class="animate mt-8 flex items-center gap-4 border-y py-4"
+      aria-label="Photo navigation"
+    >
+      <a
+        th:if="${prev != null}"
+        th:href="@{${photoUrl.detail(prev)}}"
+        class="me-auto"
+      >
+        ← Previous
+      </a>
+      <a th:href="${backUrl}" class="mx-auto text-sm">All photos</a>
+      <a
+        th:if="${next != null}"
+        th:href="@{${photoUrl.detail(next)}}"
+        class="ms-auto"
+      >
+        Next →
+      </a>
+    </nav>
+
+    <section
+      th:if="${not #lists.isEmpty(neighbors)}"
+      class="animate mt-6"
+      aria-label="Nearby photos"
+    >
+      <h2 class="mb-3 text-sm font-medium text-muted-foreground">
+        Nearby photos
+      </h2>
+      <div class="grid grid-cols-3 gap-2 sm:grid-cols-5">
+        <a
+          th:each="neighbor : ${neighbors}"
+          th:href="@{${photoUrl.detail(neighbor)}}"
+          th:classappend="${neighbor.metadata.name == photo.metadata.name ? 'ring-2 ring-foreground' : ''}"
+          class="overflow-hidden rounded-xl border"
+        >
+          <img
+            th:src="${#strings.isEmpty(neighbor.spec.cover) ? neighbor.spec.url : neighbor.spec.cover}"
+            th:alt="${neighbor.spec.displayName}"
+            class="aspect-square w-full object-cover"
+            loading="lazy"
+          />
+        </a>
+      </div>
+    </section>
+
+    <section
+      th:if="${(theme.config.post.enable_comments == null or theme.config.post.enable_comments) and haloCommentEnabled}"
+      class="mt-8"
+      aria-label="Comments"
+    >
+      <halo:comment
+        group="core.halo.run"
+        kind="Photo"
+        th:attr="name=${photo.metadata.name}"
+      >
+      </halo:comment>
+    </section>
+  </main>
+</Layout>

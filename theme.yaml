@@ -20,10 +20,6 @@ spec:
         description: 延续 Astro Theme Pure 信息层级与交互的文章列表。
         screenshot:
         file: blog.html
-      - name: Pure Links
-        description: Pure 原版三类友链、历史记录和申请说明页面。
-        screenshot:
-        file: links.html
       - name: Pure 站点条款
         description: 集中展示服务条款、隐私说明、版权和免责声明。
         screenshot:
@@ -33,7 +29,7 @@ spec:
         description: 延续 Astro Theme Pure 信息层级与交互的分类文章列表。
         screenshot:
         file: category-blog.html
-  version: "0.1.8"
+  version: "0.2.0"
   requires: ">=2.25.0"
   license:
     - name: "Apache-2.0"

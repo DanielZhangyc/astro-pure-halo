@@ -8,7 +8,7 @@
 - [x] Tags 与单标签列表
 - [x] Search 页面与 Halo 搜索索引
 - [x] About 默认正文页面与旧模板兼容
-- [x] Links 页面
+- [x] Links 官方插件路由与分组筛选
 - [x] 单页站点条款
 - [x] Moments 列表、详情、标签筛选与 RSS
 - [x] 404 与通用错误页面
@@ -23,7 +23,7 @@
 - [x] 首页卡片、技能标签与随机名言
 - [x] 文章目录、阅读进度与返回顶部
 - [x] 文章版权信息、二维码、分享与相邻文章
-- [x] 友链卡片、状态折叠与历史时间轴
+- [x] 友链卡片、插件分组与随机排序
 - [ ] Projects、Sponsors 与 Sponsorship 组件重新接入
 - [ ] 文章底部 “Buy me a cup of coffee” 入口
 
@@ -34,6 +34,7 @@
 - [x] Halo 独立页面与评论组件
 - [x] Halo Search API
 - [x] Moments 插件
+- [x] Links 插件
 - [x] 主题配置重载与旧字段兼容
 - [ ] Projects 旧配置迁移与空配置回归
 - [ ] Sponsorship 页面恢复后的文章入口回归

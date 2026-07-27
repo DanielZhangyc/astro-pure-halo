@@ -6,26 +6,43 @@ import ContentLayout from "./ContentLayout.astro";
 
 interface Props {
   title: string;
+  runtimeTitle?: string;
   comment?: boolean;
+  commentGroup?: string;
+  commentKind?: string;
+  commentName?: string;
+  commentStats?: boolean;
   view?: boolean;
 }
 
-const { title, comment = false, view = false } = Astro.props;
+const {
+  title,
+  runtimeTitle,
+  comment = false,
+  commentGroup = "content.halo.run",
+  commentKind = "SinglePage",
+  commentName = "${singlePage.metadata.name}",
+  commentStats = true,
+  view = false,
+} = Astro.props;
+const documentTitle = runtimeTitle
+  ? `|${runtimeTitle} \${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} \${site.title}|`
+  : `|${title} \${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} \${site.title}|`;
 ---
 
 <ContentLayout>
   <Fragment slot="head">
-    <title
-      th:text={`|${title} \${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} \${site.title}|`}
-    >
+    <title th:text={documentTitle}>
       {title} • Astro Theme Pure
     </title>
   </Fragment>
 
   <Fragment slot="header">
-    <h1 class="text-2xl font-medium sm:mb-2 sm:text-3xl">{title}</h1>
+    <h1 class="text-2xl font-medium sm:mb-2 sm:text-3xl" th:text={runtimeTitle}>
+      {title}
+    </h1>
     {
-      (view || comment) && (
+      (view || (comment && commentStats)) && (
         <div class="text-base text-sm text-muted-foreground italic">
           <span th:text="${singlePage.stats.visit}">0</span> views
           {comment && (
@@ -53,9 +70,9 @@ const { title, comment = false, view = false } = Astro.props;
           aria-label="Comments"
         >
           <halo:comment
-            group="content.halo.run"
-            kind="SinglePage"
-            th:attr="name=${singlePage.metadata.name}"
+            group={commentGroup}
+            kind={commentKind}
+            th:attr={`name=${commentName}`}
           />
         </section>
       )

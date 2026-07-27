@@ -72,11 +72,13 @@ pnpm halo:start
 - 评论通过 `halo:comment` 接入，插件缺失时不改变其他页面结构。
 - 每次修改设置结构后都需要在 Halo Console 重载主题配置。
 
-## 自定义页面模板
+## 页面模板与插件路由
 
-Blog、Links 和站点条款页面通过 `theme.yaml` 声明为 Halo 自定义页面模板。
-About 和暂时移除的 Projects 使用 Halo 默认页面模板和正文。创建页面后按项目
-README 的路径表选择模板。
+Blog 和站点条款页面通过 `theme.yaml` 声明为 Halo 自定义页面模板。Links 的
+`/links` 路由、模板变量和评论来源由 Halo 官方 `plugin-links` 提供，主题仅提供
+`templates/links.html` 展示模板；不要另建同路径独立页面。About 和暂时移除的
+Projects 使用 Halo 默认页面模板和正文。创建页面后按项目 README 的路径表选择
+模板。
 
 ## 重置测试数据
 

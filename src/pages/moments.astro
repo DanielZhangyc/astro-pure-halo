@@ -10,7 +10,9 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|${title} • ${site.title}|">
+    <title
+      th:text="|${title} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       Moments • Astro Theme Pure
     </title>
     <meta
@@ -24,10 +26,7 @@ import Layout from "../layouts/Layout.astro";
 
   <main class="mt-6 lg:mt-10">
     <div id="content-header" class="animate">
-      <h1
-        class="mb-6 mt-6 text-3xl font-medium sm:mt-10"
-        th:text="${title}"
-      >
+      <h1 class="mb-6 mt-6 text-3xl font-medium sm:mt-10" th:text="${title}">
         Moments
       </h1>
     </div>
@@ -38,11 +37,7 @@ import Layout from "../layouts/Layout.astro";
       th:if="${moments.total gt 0}"
       class="grid gap-y-16 sm:grid-cols-[3fr_1fr] sm:gap-x-8"
     >
-      <section
-        id="content"
-        class="animate"
-        aria-label="Moments list"
-      >
+      <section id="content" class="animate" aria-label="Moments list">
         <div
           class="mb-3 flex flex-col justify-between text-sm sm:mb-5 sm:flex-row"
         >
@@ -134,7 +129,9 @@ import Layout from "../layouts/Layout.astro";
               </th:block>
             </div>
 
-            <footer class="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <footer
+              class="mt-4 flex flex-wrap items-center justify-between gap-3"
+            >
               <div
                 th:if="${not #lists.isEmpty(moment.spec.tags)}"
                 class="flex flex-wrap gap-2"
@@ -180,11 +177,7 @@ import Layout from "../layouts/Layout.astro";
         </nav>
       </section>
 
-      <aside
-        id="sidebar"
-        class="animate"
-        th:if="${not #lists.isEmpty(tags)}"
-      >
+      <aside id="sidebar" class="animate" th:if="${not #lists.isEmpty(tags)}">
         <h2 class="mb-4 flex items-center text-lg font-medium">
           <Icon name="tag-2" class="me-2" />
           Tags

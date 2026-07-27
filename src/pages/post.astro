@@ -6,9 +6,11 @@ import Icon from "../components/Icon.astro";
 import ContentLayout from "../layouts/ContentLayout.astro";
 ---
 
-<ContentLayout back="/archives">
+<ContentLayout back="/archives" socialCard={false}>
   <Fragment slot="head">
-    <title th:text="|${post.spec.title} • ${site.title}|">
+    <title
+      th:text="|${post.spec.title} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       Article • Astro Theme Pure
     </title>
     <meta name="description" th:content="${post.status.excerpt}" />
@@ -16,9 +18,19 @@ import ContentLayout from "../layouts/ContentLayout.astro";
     <meta th:content="${post.spec.title}" property="og:title" />
     <meta th:content="${post.status.excerpt}" property="og:description" />
     <meta
-      th:if="${not #strings.isEmpty(post.spec.cover)}"
-      th:content="${post.spec.cover}"
+      th:if="${not #strings.isEmpty(post.spec.cover) or not #strings.isEmpty(theme.config.general.social_card)}"
+      th:content="${not #strings.isEmpty(post.spec.cover) ? post.spec.cover : theme.config.general.social_card}"
       property="og:image"
+    />
+    <meta
+      th:if="${not #strings.isEmpty(post.spec.cover) or not #strings.isEmpty(theme.config.general.social_card)}"
+      name="twitter:card"
+      content="summary_large_image"
+    />
+    <meta
+      th:if="${not #strings.isEmpty(post.spec.cover) or not #strings.isEmpty(theme.config.general.social_card)}"
+      name="twitter:image"
+      th:content="${not #strings.isEmpty(post.spec.cover) ? post.spec.cover : theme.config.general.social_card}"
     />
   </Fragment>
 
@@ -100,8 +112,7 @@ import ContentLayout from "../layouts/ContentLayout.astro";
       </div>
     </div>
 
-    <div class="mt-4 w-1/2 border-t max-md:mx-auto sm:mt-6 sm:w-1/3">
-    </div>
+    <div class="mt-4 w-1/2 border-t max-md:mx-auto sm:mt-6 sm:w-1/3"></div>
   </Fragment>
 
   <div th:utext="${post.content.content}"></div>
@@ -110,16 +121,10 @@ import ContentLayout from "../layouts/ContentLayout.astro";
     <div
       class="relative flex flex-col gap-y-2 rounded-xl border px-3 sm:px-4 py-2 sm:py-3"
     >
-      <Icon
-        class="absolute end-4 top-4 size-20 opacity-10"
-        name="copyright"
-      />
+      <Icon class="absolute end-4 top-4 size-20 opacity-10" name="copyright" />
 
       <div class="flex flex-col">
-        <div
-          class="font-medium text-foreground"
-          th:text="${post.spec.title}"
-        >
+        <div class="font-medium text-foreground" th:text="${post.spec.title}">
           Article title
         </div>
         <div
@@ -182,6 +187,7 @@ import ContentLayout from "../layouts/ContentLayout.astro";
             <Icon class="size-5" name="qrcode" />
           </button>
           <a
+            th:if="${theme.config.content.share == null or #lists.contains(theme.config.content.share, 'weibo')}"
             href="#"
             data-share="weibo"
             target="_blank"
@@ -191,6 +197,7 @@ import ContentLayout from "../layouts/ContentLayout.astro";
             <Icon class="size-5" name="weibo" />
           </a>
           <a
+            th:if="${theme.config.content.share == null or #lists.contains(theme.config.content.share, 'x')}"
             href="#"
             data-share="x"
             target="_blank"
@@ -200,6 +207,7 @@ import ContentLayout from "../layouts/ContentLayout.astro";
             <Icon class="size-5" name="x" />
           </a>
           <a
+            th:if="${theme.config.content.share == null or #lists.contains(theme.config.content.share, 'bluesky')}"
             href="#"
             data-share="bluesky"
             target="_blank"
@@ -318,85 +326,91 @@ import ContentLayout from "../layouts/ContentLayout.astro";
   </Fragment>
 
   <Fragment slot="scripts">
-  <script
-    is:inline
-    src="/themes/astro-pure-halo/assets/pure/vendor/medium-zoom.min.umd.js"
-    th:if="${theme.config.post.enable_image_zoom == null or theme.config.post.enable_image_zoom}"
-  >
-  </script>
-  <script is:inline th:if="${theme.config.post.enable_image_zoom == null or theme.config.post.enable_image_zoom}">
-    mediumZoom(".prose img", {
-      background: "hsl(var(--background) / 0.8)",
-    });
-  </script>
-  <script
-    is:inline
-    src="/themes/astro-pure-halo/assets/pure/vendor/qrcode.min.js"
-  >
-  </script>
-  <script is:inline>
-    const renderContent = window.location.href;
-    function loadQRcode(qrcodeContainer) {
-      if (!qrcodeContainer) throw new Error("qrcode container not found");
-      if (qrcodeContainer.innerHTML !== "") return;
-      new QRCode(qrcodeContainer, renderContent);
-    }
-    const pureQRCodeContainer = document.getElementById("qrcode-container");
-    if (!pureQRCodeContainer) throw new Error("qrcode container not found");
-    loadQRcode(pureQRCodeContainer);
-  </script>
-
-  <script>
-    const viewportHeight = window.innerHeight;
-    const thresholds = [
-      viewportHeight / 9,
-      (viewportHeight * 2) / 9,
-      (viewportHeight * 3) / 9,
-    ];
-    const blurImage = document.getElementById("blurImage");
-    if (blurImage) {
-      window.addEventListener(
-        "scroll",
-        () => {
-          const distance = window.scrollY;
-          if (distance >= thresholds[2]) blurImage.style.opacity = "0.15";
-          else if (distance >= thresholds[1])
-            blurImage.style.opacity = "0.3";
-          else if (distance >= thresholds[0])
-            blurImage.style.opacity = "0.45";
-        },
-        { passive: true },
+    <script
+      is:inline
+      src="/themes/astro-pure-halo/assets/pure/vendor/medium-zoom.min.umd.js"
+      th:if="${theme.config.post.enable_image_zoom == null or theme.config.post.enable_image_zoom}"
+    ></script>
+    <script
+      id="pure-medium-zoom-config"
+      is:inline
+      th:if="${theme.config.post.enable_image_zoom == null or theme.config.post.enable_image_zoom}"
+      th:attr="data-selector=${#strings.isEmpty(theme.config.post.image_zoom_selector) ? '.prose img' : theme.config.post.image_zoom_selector},data-class-name=${#strings.isEmpty(theme.config.post.image_zoom_class) ? 'zoomable' : theme.config.post.image_zoom_class}"
+    >
+      const pureMediumZoomConfig = document.getElementById(
+        "pure-medium-zoom-config",
       );
-    }
+      mediumZoom(pureMediumZoomConfig?.dataset.selector || ".prose img", {
+        background: "hsl(var(--background) / 0.8)",
+        className: pureMediumZoomConfig?.dataset.className || "zoomable",
+      });
+    </script>
+    <script
+      is:inline
+      src="/themes/astro-pure-halo/assets/pure/vendor/qrcode.min.js"
+    ></script>
+    <script is:inline>
+      const renderContent = window.location.href;
+      function loadQRcode(qrcodeContainer) {
+        if (!qrcodeContainer) throw new Error("qrcode container not found");
+        if (qrcodeContainer.innerHTML !== "") return;
+        new QRCode(qrcodeContainer, renderContent);
+      }
+      const pureQRCodeContainer = document.getElementById("qrcode-container");
+      if (!pureQRCodeContainer) throw new Error("qrcode container not found");
+      loadQRcode(pureQRCodeContainer);
+    </script>
 
-    document.getElementById("copy-link")?.addEventListener("click", () => {
-      navigator.clipboard.writeText(window.location.href);
-      document.dispatchEvent(
-        new CustomEvent("pure-toast", {
-          detail: { message: "Link copied!" },
-        }),
-      );
-    });
+    <script>
+      const viewportHeight = window.innerHeight;
+      const thresholds = [
+        viewportHeight / 9,
+        (viewportHeight * 2) / 9,
+        (viewportHeight * 3) / 9,
+      ];
+      const blurImage = document.getElementById("blurImage");
+      if (blurImage) {
+        window.addEventListener(
+          "scroll",
+          () => {
+            const distance = window.scrollY;
+            if (distance >= thresholds[2]) blurImage.style.opacity = "0.15";
+            else if (distance >= thresholds[1]) blurImage.style.opacity = "0.3";
+            else if (distance >= thresholds[0])
+              blurImage.style.opacity = "0.45";
+          },
+          { passive: true },
+        );
+      }
 
-    const qrContainer = document.getElementById("qrcode-container");
-    document.getElementById("get-qrcode")?.addEventListener("click", () => {
-      qrContainer?.classList.toggle("expanded");
-    });
+      document.getElementById("copy-link")?.addEventListener("click", () => {
+        navigator.clipboard.writeText(window.location.href);
+        document.dispatchEvent(
+          new CustomEvent("pure-toast", {
+            detail: { message: "Link copied!" },
+          }),
+        );
+      });
 
-    const title = document.querySelector("h1")?.textContent || "";
-    document.querySelectorAll<HTMLAnchorElement>("[data-share]").forEach(
-      (link) => {
-        const share = link.dataset.share;
-        if (share === "weibo") {
-          link.href = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(title)}`;
-        } else if (share === "x") {
-          link.href = `https://x.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`;
-        } else {
-          link.href = `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title}\n${window.location.href}`)}`;
-        }
-      },
-    );
-  </script>
+      const qrContainer = document.getElementById("qrcode-container");
+      document.getElementById("get-qrcode")?.addEventListener("click", () => {
+        qrContainer?.classList.toggle("expanded");
+      });
+
+      const title = document.querySelector("h1")?.textContent || "";
+      document
+        .querySelectorAll<HTMLAnchorElement>("[data-share]")
+        .forEach((link) => {
+          const share = link.dataset.share;
+          if (share === "weibo") {
+            link.href = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(title)}`;
+          } else if (share === "x") {
+            link.href = `https://x.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(window.location.href)}`;
+          } else {
+            link.href = `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title}\n${window.location.href}`)}`;
+          }
+        });
+    </script>
   </Fragment>
 
   <style>

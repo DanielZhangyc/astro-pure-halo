@@ -8,12 +8,13 @@ import Layout from "./Layout.astro";
 
 interface Props {
   back?: string;
+  socialCard?: boolean;
 }
 
-const { back = "/" } = Astro.props;
+const { back = "/", socialCard = true } = Astro.props;
 ---
 
-<Layout>
+<Layout socialCard={socialCard}>
   <slot name="head" slot="head" />
   <PureButton title="Back" href={back} variant="back" />
 
@@ -54,6 +55,7 @@ const { back = "/" } = Astro.props;
         id="content"
         class="max-w-none animate mt-8 md:min-w-[45ch] overflow-x-hidden prose text-base"
         data-article-content
+        th:attr="data-blockquote-style=${#strings.isEmpty(theme.config.content.blockquote_style) ? 'italic' : theme.config.content.blockquote_style},data-inline-code-style=${#strings.isEmpty(theme.config.content.inline_code_style) ? 'modern' : theme.config.content.inline_code_style}"
       >
         <slot />
       </div>
@@ -100,6 +102,22 @@ const { back = "/" } = Astro.props;
 
   <slot name="scripts" />
 
+  <style is:global>
+    .prose[data-blockquote-style="normal"] blockquote {
+      font-style: normal;
+    }
+    .prose[data-inline-code-style="code"] :not(pre) > code {
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      padding: 0;
+    }
+    .prose[data-inline-code-style="code"] :not(pre) > code::before,
+    .prose[data-inline-code-style="code"] :not(pre) > code::after {
+      content: "`";
+    }
+  </style>
+
   <script>
     const sidebarButton = document.getElementById("sidebar-btn");
     const sidebar = document.getElementById("sidebar");
@@ -126,10 +144,8 @@ const { back = "/" } = Astro.props;
         progressBar: HTMLElement;
         slug: string;
       }> = [];
-      headingProgress: Record<
-        string,
-        { inView: boolean; progress: number }
-      > = {};
+      headingProgress: Record<string, { inView: boolean; progress: number }> =
+        {};
 
       connectedCallback() {
         const content = document.getElementById("content");
@@ -181,7 +197,11 @@ const { back = "/" } = Astro.props;
               (heading) => heading.id === link.slug,
             );
             if (!target) return;
-            history.pushState(null, target.textContent || "", link.element.href);
+            history.pushState(
+              null,
+              target.textContent || "",
+              link.element.href,
+            );
             target.scrollIntoView({ behavior: "smooth" });
           });
         });
@@ -248,9 +268,8 @@ const { back = "/" } = Astro.props;
       connectedCallback() {
         const actionButtons = document.getElementById("action-buttons");
         const button = this.querySelector<HTMLButtonElement>("#to-top-btn");
-        const percentElement = button?.querySelector<HTMLElement>(
-          ".top-text .text",
-        );
+        const percentElement =
+          button?.querySelector<HTMLElement>(".top-text .text");
         const header = document.getElementById("content-header");
         const article = document.getElementById("content");
         if (!actionButtons || !button || !percentElement || !article) return;
@@ -276,10 +295,7 @@ const { back = "/" } = Astro.props;
               : maxScrollable <= 0
                 ? 100
                 : Math.round(
-                    (Math.min(
-                      scrollTop - article.offsetTop,
-                      maxScrollable,
-                    ) /
+                    (Math.min(scrollTop - article.offsetTop, maxScrollable) /
                       maxScrollable) *
                       100,
                   );
@@ -360,8 +376,7 @@ const { back = "/" } = Astro.props;
       color: hsl(var(--foreground) / 0.75) !important;
       font-weight: 400;
     }
-    toc-heading[data-toc-style="pure"]
-      :global(.highlight-bg-translucent) {
+    toc-heading[data-toc-style="pure"] :global(.highlight-bg-translucent) {
       background-color: hsl(var(--muted) / 1);
     }
     toc-heading :global(.highlight-bg) {

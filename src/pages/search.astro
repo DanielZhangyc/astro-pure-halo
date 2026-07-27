@@ -7,7 +7,11 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|Search • ${site.title}|">Search • Astro Theme Pure</title>
+    <title
+      th:text="|Search ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
+      Search • Astro Theme Pure
+    </title>
     <meta
       name="description"
       content="Search relative posts of the whole blog"

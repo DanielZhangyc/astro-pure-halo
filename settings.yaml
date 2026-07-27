@@ -4,6 +4,31 @@ metadata:
   name: astro-pure-halo-setting
 spec:
   forms:
+    - group: general
+      label: 基础
+      formSchema:
+        - $formkit: attachment
+          name: social_card
+          label: 默认社交分享图片
+          help: 页面没有独立封面时用于 Open Graph 和社交分享卡片；留空时不输出默认图片。
+          accepts:
+            - image/*
+          value: ""
+        - $formkit: text
+          name: title_delimiter
+          label: 页面标题分隔符
+          help: 用于连接当前页面标题与 Halo 站点标题。
+          value: "•"
+        - $formkit: text
+          name: og_locale
+          label: Open Graph Locale
+          help: 例如 en_US、zh_CN；留空时根据 Halo 站点语言自动生成。
+          value: ""
+        - $formkit: text
+          name: date_locale
+          label: 日期 Locale
+          help: 浏览器 Intl 日期格式使用的 locale，例如 en-US、zh-CN。
+          value: en-US
     - group: home
       label: 首页
       formSchema:
@@ -191,6 +216,16 @@ spec:
           label: 显示底部随机名言
           help: 关闭后首页不显示随机名言，也不会请求随机名言接口。
           value: true
+        - $formkit: url
+          name: quote_server
+          label: 随机名言接口
+          help: 返回 JSON 的 HTTP(S) 接口。
+          value: https://dummyjson.com/quotes/random
+        - $formkit: textarea
+          name: quote_target
+          label: 随机名言解析函数
+          help: 以 data 为参数并返回字符串的 JavaScript 表达式；仅填写受信任的代码。
+          value: "(data) => (data.quote.length > 80 ? `${data.quote.slice(0, 80)}...` : data.quote || 'Error')"
     - group: style
       label: 外观
       formSchema:
@@ -206,6 +241,59 @@ spec:
           label: 显示搜索按钮
           help: Halo 会自动提供 /search 路由，无需创建同名独立页面。
           value: true
+    - group: content
+      label: 内容
+      formSchema:
+        - $formkit: number
+          name: blog_page_size
+          label: Blog 每页文章数
+          help: 用于 Pure Blog 自定义页面的客户端分页。
+          min: 1
+          max: 100
+          value: 8
+        - $formkit: checkbox
+          name: share
+          label: 文章分享按钮
+          help: 选择文章版权卡片中显示的分享平台。
+          value:
+            - weibo
+            - x
+            - bluesky
+          options:
+            - label: 微博
+              value: weibo
+            - label: X
+              value: x
+            - label: Bluesky
+              value: bluesky
+        - $formkit: text
+          name: external_link_content
+          label: 外链标记
+          help: 追加到正文绝对 HTTP(S) 链接后的提示；留空时仍在新窗口打开外链，但不追加文字。
+          value: " ↗"
+        - $formkit: switch
+          name: image_caption
+          label: 使用图片 Alt 作为说明
+          help: 开启后，正文中带 Alt 文本的图片会显示居中的图片说明。
+          value: false
+        - $formkit: select
+          name: blockquote_style
+          label: 引用文字样式
+          value: italic
+          options:
+            - label: 斜体
+              value: italic
+            - label: 正常
+              value: normal
+        - $formkit: select
+          name: inline_code_style
+          label: 行内代码样式
+          value: modern
+          options:
+            - label: Modern（边框与背景）
+              value: modern
+            - label: Code（反引号）
+              value: code
     - group: pages_links
       label: 友链页面
       formSchema:
@@ -420,9 +508,109 @@ spec:
           name: enable_image_zoom
           label: 启用正文图片 Medium Zoom
           value: true
+        - $formkit: text
+          name: image_zoom_selector
+          label: Medium Zoom 选择器
+          help: Halo 正文图片默认使用 .prose img；可按需限制为带特定 class 的图片。
+          value: .prose img
+        - $formkit: text
+          name: image_zoom_class
+          label: Medium Zoom Class
+          help: Medium Zoom 打开时附加的 className。
+          value: zoomable
     - group: footer
       label: 页脚
       formSchema:
+        - $formkit: number
+          name: start_year
+          label: 版权起始年份
+          help: 留空时只显示当前年份；填写早于当前年份的值时显示“起始年份 - 当前年份”。
+          min: 1970
+          max: 2100
+          value:
+        - $formkit: array
+          name: links
+          label: 其他页脚链接
+          help: 位置 1 显示在版权行之前，位置 2 附加在版权名称之后。
+          addLabel: 添加页脚链接
+          value: []
+          itemLabels:
+            - type: text
+              label: $value.title
+          children:
+            - $formkit: text
+              name: title
+              label: 文案
+              validation: required
+              value: ""
+            - $formkit: text
+              name: link
+              label: 链接
+              validation: required
+              value: ""
+            - $formkit: select
+              name: position
+              label: 位置
+              value: 1
+              options:
+                - label: 版权行之前
+                  value: 1
+                - label: 版权名称之后
+                  value: 2
+            - $formkit: select
+              name: style
+              label: 文案样式
+              value: ""
+              options:
+                - label: 默认
+                  value: ""
+                - label: 小号文字
+                  value: text-sm
+        - $formkit: array
+          name: social
+          label: 社交链接
+          help: 配置后显示在页脚右侧；留空时继续使用下方 GitHub 与 RSS 兼容开关。
+          addLabel: 添加社交链接
+          value: []
+          itemLabels:
+            - type: text
+              label: $value.label
+          children:
+            - $formkit: select
+              name: icon
+              label: 图标
+              validation: required
+              value: github
+              options:
+                - { label: GitHub, value: github }
+                - { label: GitLab, value: gitlab }
+                - { label: Discord, value: discord }
+                - { label: YouTube, value: youtube }
+                - { label: Instagram, value: instagram }
+                - { label: X, value: x }
+                - { label: Telegram, value: telegram }
+                - { label: RSS, value: rss }
+                - { label: Email, value: email }
+                - { label: Reddit, value: reddit }
+                - { label: Bluesky, value: bluesky }
+                - { label: TikTok, value: tiktok }
+                - { label: 微博, value: weibo }
+                - { label: Steam, value: steam }
+                - { label: 哔哩哔哩, value: bilibili }
+                - { label: 知乎, value: zhihu }
+                - { label: 酷安, value: coolapk }
+                - { label: 网易云音乐, value: netease }
+            - $formkit: text
+              name: label
+              label: 无障碍标签
+              validation: required
+              value: ""
+            - $formkit: text
+              name: href
+              label: 链接
+              help: "支持绝对地址、站内相对地址和 mailto: 邮箱链接。"
+              validation: required
+              value: ""
         - $formkit: text
           name: registration
           label: 备案信息

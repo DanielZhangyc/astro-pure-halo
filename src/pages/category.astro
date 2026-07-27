@@ -6,7 +6,9 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|Category: ${category.spec.displayName} • ${site.title}|">
+    <title
+      th:text="|Category: ${category.spec.displayName} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       Category • Astro Theme Pure
     </title>
   </Fragment>

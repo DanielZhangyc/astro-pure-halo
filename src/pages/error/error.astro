@@ -6,15 +6,14 @@ import Layout from "../../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|${error.status} • ${site.title}|">
+    <title
+      th:text="|${error.status} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       Error • Astro Theme Pure
     </title>
   </Fragment>
   <div class="px-4 py-10 text-center sm:px-6 lg:px-8">
-    <h1
-      class="block text-7xl font-bold sm:text-9xl"
-      th:text="${error.status}"
-    >
+    <h1 class="block text-7xl font-bold sm:text-9xl" th:text="${error.status}">
       500
     </h1>
     <p
@@ -30,11 +29,6 @@ import Layout from "../../layouts/Layout.astro";
     >
       Sorry, something went wrong.
     </p>
-    <PureButton
-      title="Back to home"
-      href="/"
-      variant="ahead"
-      class="mt-5"
-    />
+    <PureButton title="Back to home" href="/" variant="ahead" class="mt-5" />
   </div>
 </Layout>

@@ -6,7 +6,9 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|Tag: ${tag.spec.displayName} • ${site.title}|">
+    <title
+      th:text="|Tag: ${tag.spec.displayName} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       Tag • Astro Theme Pure
     </title>
     <meta
@@ -20,7 +22,8 @@ import Layout from "../layouts/Layout.astro";
     <div id="content-header" class="animate">
       <h1 class="mb-6 flex items-end gap-x-2 text-3xl font-medium">
         Tags:
-        <span class="text-2xl" th:text="|#${tag.spec.displayName}|">#Astro</span>
+        <span class="text-2xl" th:text="|#${tag.spec.displayName}|">#Astro</span
+        >
       </h1>
     </div>
 

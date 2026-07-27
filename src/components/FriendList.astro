@@ -9,9 +9,24 @@ interface Friend {
 interface Props {
   friends: Friend[];
   runtimeSource?: string;
+  runtimeModel?: "theme" | "plugin";
 }
 
-const { friends, runtimeSource } = Astro.props;
+const { friends, runtimeSource, runtimeModel = "theme" } = Astro.props;
+const runtimeFields =
+  runtimeModel === "plugin"
+    ? {
+        avatar: "friend.spec.logo",
+        intro: "friend.spec.description",
+        link: "friend.spec.url",
+        name: "friend.spec.displayName",
+      }
+    : {
+        avatar: "friend.avatar",
+        intro: "friend.intro",
+        link: "friend.link",
+        name: "friend.name",
+      };
 const getAvatar = (friend: Friend) => {
   if (friend.avatar) return friend.avatar;
   try {
@@ -28,8 +43,8 @@ const getAvatar = (friend: Friend) => {
       <>
         <a
           th:each={`friend : \${${runtimeSource}}`}
-          th:href="${#strings.isEmpty(friend.link) ? null : friend.link}"
-          th:target="${#strings.isEmpty(friend.link) ? null : '_blank'}"
+          th:href={`\${#strings.isEmpty(${runtimeFields.link}) ? null : ${runtimeFields.link}}`}
+          th:target={`\${#strings.isEmpty(${runtimeFields.link}) ? null : '_blank'}`}
           rel="noopener noreferrer"
           data-no-external-marker
           class="no-underline"
@@ -39,12 +54,12 @@ const getAvatar = (friend: Friend) => {
               <div class="relative h-14 w-14 min-w-14 overflow-hidden rounded-full">
                 <img
                   class="my-0 h-full w-full bg-card"
-                  th:src="${#strings.isEmpty(friend.avatar) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png' : friend.avatar}"
-                  th:attr="data-favicon-link=${#strings.isEmpty(friend.avatar) ? friend.link : null}"
+                  th:src={`\${#strings.isEmpty(${runtimeFields.avatar}) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png' : ${runtimeFields.avatar}}`}
+                  th:attr={`data-favicon-link=\${#strings.isEmpty(${runtimeFields.avatar}) ? ${runtimeFields.link} : null}`}
                   src="/themes/astro-pure-halo/assets/pure/avatar.webp"
                   height="80"
                   width="80"
-                  th:alt="|${friend.name} avatar|"
+                  th:alt={`|\${${runtimeFields.name}} avatar|`}
                   alt="Friend avatar"
                   loading="lazy"
                 />
@@ -77,12 +92,15 @@ const getAvatar = (friend: Friend) => {
                 </div>
               </div>
               <div class="flex flex-col gap-y-1">
-                <p class="my-0 line-clamp-1 text-sm" th:text="${friend.name}">
+                <p
+                  class="my-0 line-clamp-1 text-sm"
+                  th:text={`\${${runtimeFields.name}}`}
+                >
                   Friend
                 </p>
                 <p
                   class="my-0 line-clamp-1 text-xs text-muted-foreground"
-                  th:text="${friend.intro}"
+                  th:text={`\${${runtimeFields.intro}}`}
                 >
                   Introduction
                 </p>
@@ -90,8 +108,8 @@ const getAvatar = (friend: Friend) => {
             </div>
             <img
               class="absolute -start-2 top-0 z-0 my-0 h-full w-2/3 bg-white object-cover opacity-15"
-              th:src="${#strings.isEmpty(friend.avatar) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png' : friend.avatar}"
-              th:attr="data-favicon-link=${#strings.isEmpty(friend.avatar) ? friend.link : null}"
+              th:src={`\${#strings.isEmpty(${runtimeFields.avatar}) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png' : ${runtimeFields.avatar}}`}
+              th:attr={`data-favicon-link=\${#strings.isEmpty(${runtimeFields.avatar}) ? ${runtimeFields.link} : null}`}
               src="/themes/astro-pure-halo/assets/pure/avatar.webp"
               height="80"
               width="80"

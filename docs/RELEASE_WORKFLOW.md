@@ -6,10 +6,10 @@
 feature/* ─┐
 fix/*     ─┼─ PR ─> dev ─> release/vX.Y.Z ─ PR ─> main ─> CI ─> vX.Y.Z Release
 docs/*    ─┘                                      │
-                                                  └─ PR ─> dev（版本回灌）
+                                                  └─ PR ─> dev（发布内容回灌）
 
 main ─> hotfix/vX.Y.Z ─ PR ─> main ─> vX.Y.Z Release
-                                  └─ PR ─> dev（修复回灌）
+                                  └─ PR ─> dev（发布内容回灌）
 ```
 
 - `main`：稳定、可安装、可回退的版本账本。每次更新都必须是一个完整的新版本。
@@ -56,10 +56,38 @@ git switch -c release/v0.2.0
    merge。
 5. 合入 `main` 后等待 CI。CI 成功后，Release 工作流读取人为填写在发布分支中的
    `0.2.0`，自动创建 `v0.2.0` tag 和 GitHub Release，并上传主题 ZIP。
-6. 创建 `main` 到 `dev` 的同步 Pull Request，使两个长期分支拥有相同的发布
-   版本基线。
+6. 创建 `main` 到 `dev` 的同步 Pull Request，将发布版本、变更记录和发布阶段的
+   修复回灌到集成分支。该 PR 仍使用 Squash merge，不要求两个长期分支指向同一
+   提交。
 
 不要修改已经发布版本的 tag 或 ZIP；有任何修复都发布更高版本。
+
+## 如何理解 `main` 与 `dev` 的同步
+
+本项目中的“同步”指发布内容已经从 `main` 回灌到 `dev`，不是要求两个分支具有
+相同的提交历史或指向同一个提交：
+
+- `main` 保存已发布版本，每次发布 PR 在这里 Squash 成一个发布提交。
+- `dev` 保存下一版本的集成历史，`main` 到 `dev` 的同步 PR 也会 Squash 成一个
+  回灌提交。
+- 两次 Squash 会生成不同的提交 ID。即使同步完成，GitHub 仍可能显示 `dev` 同时
+  ahead of 和 behind `main`；这是提交拓扑的正常结果，不是内容冲突或同步失败。
+- 如果同步后尚未向 `dev` 合入下一版本改动，`main` 与 `dev` 的文件快照应相同。
+  如果开发已经继续，`dev` 可以额外包含下一版本改动，但必须保留最新发布版本的
+  回灌内容。
+
+需要确认刚完成的发布同步时，可以比较两个远端分支的文件快照：
+
+```bash
+git fetch origin
+git diff --stat origin/main origin/dev
+```
+
+没有输出表示文件快照相同；有输出时应确认差异是否仅来自同步后进入 `dev` 的下一
+版本开发。不要用 GitHub 的 ahead/behind 数字作为内容同步的判断依据，也不要为了
+清除该提示而重置分支、执行 rebase 或强制推送。长期分支的本地更新统一使用
+`git pull --ff-only`，发现分叉时先检查远端 PR 和分支来源，不在 `main` 或 `dev`
+上直接整理历史。
 
 ## GitHub Release 自动发布
 
@@ -92,8 +120,9 @@ ZIP 已存在时不会覆盖发布制品。
 - 默认分支保持 `main`，让仓库首页和下载者看到稳定版本；创建开发 PR 时明确选择
   `dev` 为 base。
 
-只保留 Squash merge 是为了让 `main` 和 `dev` 保持线性、易回退；默认分支保留
-`main` 是为了避免尚未发布的 `dev` 内容成为仓库对外默认视图。
+只保留 Squash merge 是为了让 `main` 和 `dev` 各自保持线性、易回退；它不保证
+两个分支共享同一条提交历史。默认分支保留 `main`，是为了避免尚未发布的 `dev`
+内容成为仓库对外默认视图。
 
 ## Ruleset：`main-release`
 
@@ -168,7 +197,8 @@ Release 工作流会进一步验证 tag 名、两个版本文件、变更记录�
 
 1. 从当前 `origin/main` 创建并推送 `dev`，不要携带尚未发布的工作区改动。
 2. 先把 CI、Policy 和 Release 工作流作为一个版本发布到 `main`。
-3. 通过 `main` 到 `dev` 的 Pull Request 同步发布后的基线。
+3. 通过 `main` 到 `dev` 的 Pull Request 回灌发布内容；Squash 后出现
+   ahead/behind 属于预期行为。
 4. 创建两个 Branch ruleset，先用 Evaluate 观察一次 PR。
 5. 在 Ruleset 中选择已经出现的 `CI validate` 与 `PR policy`，然后切换
    Active。

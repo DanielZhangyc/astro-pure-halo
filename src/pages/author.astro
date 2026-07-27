@@ -6,7 +6,9 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|${author.spec.displayName} • ${site.title}|">
+    <title
+      th:text="|${author.spec.displayName} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       Author • Astro Theme Pure
     </title>
   </Fragment>

@@ -4,7 +4,9 @@ import ContentLayout from "../layouts/ContentLayout.astro";
 
 <ContentLayout back="/">
   <Fragment slot="head">
-    <title th:text="|站点条款 • ${site.title}|">
+    <title
+      th:text="|站点条款 ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       站点条款 • Astro Theme Pure
     </title>
     <meta
@@ -19,12 +21,14 @@ import ContentLayout from "../layouts/ContentLayout.astro";
       生效日期：
       <time
         th:text="${#strings.isEmpty(theme.config.pages_terms.effective_date) ? '2026-07-27' : theme.config.pages_terms.effective_date}"
-      >2026-07-27</time>
+        >2026-07-27</time
+      >
     </div>
   </Fragment>
 
   <p>
-    欢迎访问 <strong th:text="${site.title}">本网站</strong>。本页面集中说明本网站的使用规则、个人信息处理方式、版权政策和免责声明。请在使用互动功能或提交信息前阅读相关内容。
+    欢迎访问 <strong th:text="${site.title}">本网站</strong
+    >。本页面集中说明本网站的使用规则、个人信息处理方式、版权政策和免责声明。请在使用互动功能或提交信息前阅读相关内容。
   </p>
 
   <h2 id="scope">一、适用范围与服务</h2>
@@ -32,7 +36,8 @@ import ContentLayout from "../layouts/ContentLayout.astro";
     本网站由
     <strong
       th:text="${#strings.isEmpty(theme.config.pages_terms.operator) ? site.title : theme.config.pages_terms.operator}"
-    >站点运营者</strong>
+      >站点运营者</strong
+    >
     运营，主要用于发布文章、作品、资料及其他公开内容，并可能提供评论、搜索、订阅、账号或其他互动功能。
   </p>
   <p>
@@ -60,16 +65,20 @@ import ContentLayout from "../layouts/ContentLayout.astro";
   <h3 id="information-collected">可能处理的信息</h3>
   <ul>
     <li>
-      <strong>访问与安全日志：</strong>IP 地址、浏览器和设备信息、访问时间、请求页面、来源页面及错误记录，用于页面传输、故障排查、防止攻击和维护安全。
+      <strong>访问与安全日志：</strong>IP
+      地址、浏览器和设备信息、访问时间、请求页面、来源页面及错误记录，用于页面传输、故障排查、防止攻击和维护安全。
     </li>
     <li>
-      <strong>主动提交的信息：</strong>你在评论、表单或账号功能中填写的昵称、邮箱、网站地址、正文及附件，用于展示内容、回复沟通、发送必要通知或管理互动。
+      <strong>主动提交的信息：</strong
+      >你在评论、表单或账号功能中填写的昵称、邮箱、网站地址、正文及附件，用于展示内容、回复沟通、发送必要通知或管理互动。
     </li>
     <li>
-      <strong>本地存储与 Cookie：</strong>可能用于保存明暗主题偏好、登录状态、安全校验和必要功能。关闭相关存储可能影响部分功能。
+      <strong>本地存储与 Cookie：</strong
+      >可能用于保存明暗主题偏好、登录状态、安全校验和必要功能。关闭相关存储可能影响部分功能。
     </li>
     <li>
-      <strong>统计与第三方请求：</strong>如果站点启用了访问统计、评论、字体、图片、随机名言或社交统计等服务，浏览器可能直接向相应服务提供方发送网络请求。
+      <strong>统计与第三方请求：</strong
+      >如果站点启用了访问统计、评论、字体、图片、随机名言或社交统计等服务，浏览器可能直接向相应服务提供方发送网络请求。
     </li>
   </ul>
 
@@ -83,7 +92,8 @@ import ContentLayout from "../layouts/ContentLayout.astro";
 
   <h3 id="third-parties">第三方服务与外部链接</h3>
   <p>
-    本网站可能使用 Halo 插件、托管/CDN、评论、统计、邮件、对象存储或其他第三方服务，也可能链接至外部网站。第三方会依据其自身条款和隐私政策处理信息，本网站无法控制其独立行为。访问第三方服务前，请查看其政策。
+    本网站可能使用 Halo
+    插件、托管/CDN、评论、统计、邮件、对象存储或其他第三方服务，也可能链接至外部网站。第三方会依据其自身条款和隐私政策处理信息，本网站无法控制其独立行为。访问第三方服务前，请查看其政策。
   </p>
 
   <h3 id="your-rights">你的权利</h3>
@@ -109,10 +119,18 @@ import ContentLayout from "../layouts/ContentLayout.astro";
 
   <h2 id="disclaimer">五、免责声明</h2>
   <ul>
-    <li>本站内容主要用于一般信息、学习和经验分享，不构成医疗、法律、投资或其他专业意见。</li>
-    <li>内容可能存在时效性、遗漏或错误；在作出重要决定前，请自行核实并咨询具备资质的专业人士。</li>
-    <li>外部链接仅为访问便利而提供，不代表对第三方内容、安全性或持续可用性的认可或担保。</li>
-    <li>在适用法律允许的范围内，因不可抗力、网络故障、第三方服务或用户不当使用造成的损失，由责任方依法承担。</li>
+    <li>
+      本站内容主要用于一般信息、学习和经验分享，不构成医疗、法律、投资或其他专业意见。
+    </li>
+    <li>
+      内容可能存在时效性、遗漏或错误；在作出重要决定前，请自行核实并咨询具备资质的专业人士。
+    </li>
+    <li>
+      外部链接仅为访问便利而提供，不代表对第三方内容、安全性或持续可用性的认可或担保。
+    </li>
+    <li>
+      在适用法律允许的范围内，因不可抗力、网络故障、第三方服务或用户不当使用造成的损失，由责任方依法承担。
+    </li>
   </ul>
 
   <h2 id="changes">六、条款更新</h2>
@@ -121,11 +139,11 @@ import ContentLayout from "../layouts/ContentLayout.astro";
   </p>
 
   <h2 id="contact">七、联系与请求</h2>
-  <p
-    th:if="${not #strings.isEmpty(theme.config.pages_terms.contact)}"
-  >
+  <p th:if="${not #strings.isEmpty(theme.config.pages_terms.contact)}">
     如需行使个人信息权利、提交侵权通知或询问本条款，请联系：
-    <code th:text="${theme.config.pages_terms.contact}">contact@example.com</code>
+    <code th:text="${theme.config.pages_terms.contact}"
+      >contact@example.com</code
+    >
   </p>
   <p th:if="${#strings.isEmpty(theme.config.pages_terms.contact)}">
     如需行使个人信息权利、提交侵权通知或询问本条款，请通过本网站公开的联系方式或评论功能联系运营者。
@@ -138,6 +156,7 @@ import ContentLayout from "../layouts/ContentLayout.astro";
     <p
       class="whitespace-pre-line"
       th:text="${theme.config.pages_terms.additional_notice}"
-    ></p>
+    >
+    </p>
   </div>
 </ContentLayout>

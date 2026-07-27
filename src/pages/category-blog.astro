@@ -11,11 +11,12 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|Blog • ${site.title}|">Blog • Astro Theme Pure</title>
-    <meta
-      name="description"
-      content="Some posts or archives of my blog"
-    />
+    <title
+      th:text="|Blog ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
+      Blog • Astro Theme Pure
+    </title>
+    <meta name="description" content="Some posts or archives of my blog" />
   </Fragment>
 
   <PureButton title="Back" href="/" variant="back" />

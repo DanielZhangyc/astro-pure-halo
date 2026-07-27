@@ -15,10 +15,11 @@ import IconSprite from "../components/IconSprite.astro";
 interface Props {
   highlightColor?: string;
   pageTitle?: string;
+  socialCard?: boolean;
   wide?: boolean;
 }
 
-const { highlightColor = "#659EB9" } = Astro.props;
+const { highlightColor = "#659EB9", socialCard = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -38,6 +39,36 @@ const { highlightColor = "#659EB9" } = Astro.props;
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#FCFCFD" />
     <meta name="description" th:content="${site.subtitle}" />
+    <meta
+      name="author"
+      th:content="${#strings.isEmpty(theme.config.home.profile_name) ? site.title : theme.config.home.profile_name}"
+    />
+    <meta property="og:site_name" th:content="${site.title}" />
+    <meta
+      property="og:locale"
+      th:content="${#strings.isEmpty(theme.config.general.og_locale) ? #strings.replace(site.language, '-', '_') : theme.config.general.og_locale}"
+    />
+    {
+      socialCard && (
+        <>
+          <meta
+            th:if="${not #strings.isEmpty(theme.config.general.social_card)}"
+            property="og:image"
+            th:content="${theme.config.general.social_card}"
+          />
+          <meta
+            th:if="${not #strings.isEmpty(theme.config.general.social_card)}"
+            name="twitter:card"
+            content="summary_large_image"
+          />
+          <meta
+            th:if="${not #strings.isEmpty(theme.config.general.social_card)}"
+            name="twitter:image"
+            th:content="${theme.config.general.social_card}"
+          />
+        </>
+      )
+    }
 
     <link
       rel="icon"
@@ -95,7 +126,10 @@ const { highlightColor = "#659EB9" } = Astro.props;
     <slot name="head" />
   </head>
 
-  <body class="flex justify-center bg-background text-foreground">
+  <body
+    class="flex justify-center bg-background text-foreground"
+    th:attr="data-date-locale=${#strings.isEmpty(theme.config.general.date_locale) ? 'en-US' : theme.config.general.date_locale},data-external-link-content=${theme.config.content.external_link_content},data-image-caption=${theme.config.content.image_caption != null and theme.config.content.image_caption}"
+  >
     <IconSprite />
     <div
       id="highlight-gradient"
@@ -151,24 +185,34 @@ const { highlightColor = "#659EB9" } = Astro.props;
           }
         });
 
-      const pureDateFormatter = new Intl.DateTimeFormat("en-US", {
+      const pureDateLocale = document.body.dataset.dateLocale || "en-US";
+      const createPureDateFormatter = (options: Intl.DateTimeFormatOptions) => {
+        try {
+          return new Intl.DateTimeFormat(pureDateLocale, options);
+        } catch {
+          return new Intl.DateTimeFormat("en-US", options);
+        }
+      };
+      const pureDateFormatter = createPureDateFormatter({
         day: "numeric",
         month: "short",
         year: "numeric",
       });
-      const pureLongDateFormatter = new Intl.DateTimeFormat("en-US", {
+      const pureLongDateFormatter = createPureDateFormatter({
         day: "numeric",
         month: "long",
         year: "numeric",
       });
-      document.querySelectorAll<HTMLElement>("[data-pure-date]").forEach((date) => {
-        const value = date.getAttribute("datetime");
-        if (!value) return;
-        const parsed = new Date(value);
-        if (!Number.isNaN(parsed.getTime())) {
-          date.textContent = pureDateFormatter.format(parsed);
-        }
-      });
+      document
+        .querySelectorAll<HTMLElement>("[data-pure-date]")
+        .forEach((date) => {
+          const value = date.getAttribute("datetime");
+          if (!value) return;
+          const parsed = new Date(value);
+          if (!Number.isNaN(parsed.getTime())) {
+            date.textContent = pureDateFormatter.format(parsed);
+          }
+        });
       document
         .querySelectorAll<HTMLElement>("[data-pure-date-long]")
         .forEach((date) => {
@@ -179,6 +223,45 @@ const { highlightColor = "#659EB9" } = Astro.props;
             date.textContent = pureLongDateFormatter.format(parsed);
           }
         });
+
+      document
+        .querySelectorAll<HTMLAnchorElement>(".prose a[href]")
+        .forEach((link) => {
+          const href = link.getAttribute("href") || "";
+          if (!/^https?:\/\//i.test(href)) return;
+          link.target = "_blank";
+          link.rel = "nofollow noopener noreferrer";
+          const markerContent = document.body.hasAttribute(
+            "data-external-link-content",
+          )
+            ? document.body.dataset.externalLinkContent || ""
+            : " ↗";
+          if (
+            markerContent &&
+            !link.querySelector("[data-pure-external-marker]")
+          ) {
+            const marker = document.createElement("span");
+            marker.dataset.pureExternalMarker = "";
+            marker.style.userSelect = "none";
+            marker.textContent = markerContent;
+            link.append(marker);
+          }
+        });
+
+      if (document.body.dataset.imageCaption === "true") {
+        document
+          .querySelectorAll<HTMLImageElement>(".prose img[alt]")
+          .forEach((image) => {
+            const caption = image.alt.trim();
+            if (!caption || image.parentElement?.tagName === "FIGURE") return;
+            const figure = document.createElement("figure");
+            figure.style.textAlign = "center";
+            const figcaption = document.createElement("figcaption");
+            figcaption.textContent = caption;
+            image.replaceWith(figure);
+            figure.append(image, figcaption);
+          });
+      }
     </script>
   </body>
 </html>

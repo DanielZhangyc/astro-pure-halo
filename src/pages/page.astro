@@ -7,7 +7,9 @@ import ContentLayout from "../layouts/ContentLayout.astro";
 
 <ContentLayout>
   <Fragment slot="head">
-    <title th:text="|${singlePage.spec.title} • ${site.title}|">
+    <title
+      th:text="|${singlePage.spec.title} ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       Page • Astro Theme Pure
     </title>
     <meta name="description" th:content="${singlePage.status.excerpt}" />

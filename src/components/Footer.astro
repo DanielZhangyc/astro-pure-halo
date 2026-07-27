@@ -14,6 +14,23 @@ import Icon from "./Icon.astro";
         class="flex items-center gap-x-4 gap-y-2 text-muted-foreground max-sm:flex-col"
       >
         <div
+          th:if="${theme.config.footer.links != null and not #lists.isEmpty(theme.config.footer.links)}"
+          class="flex items-center gap-x-2"
+        >
+          <th:block th:each="footerLink : ${theme.config.footer.links}">
+            <a
+              th:if="${footerLink.position == null or footerLink.position == 1}"
+              th:href="${footerLink.link}"
+              th:text="${footerLink.title}"
+              th:classappend="${footerLink.style}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Footer link
+            </a>
+          </th:block>
+        </div>
+        <div
           th:if="${theme.config.footer.registration != null and not #strings.isEmpty(theme.config.footer.registration)}"
         >
           <a
@@ -27,6 +44,11 @@ import Icon from "./Icon.astro";
         </div>
         <div>
           <span>© </span>
+          <span
+            th:if="${not #strings.isEmpty(theme.config.footer.start_year) and #strings.toString(theme.config.footer.start_year) lt #strings.toString(#dates.year(#dates.createNow()))}"
+            th:text="|${theme.config.footer.start_year} - |"
+          >
+          </span>
           <span th:text="${#dates.year(#dates.createNow())}">2026</span>
           <span
             th:text="| ${#strings.isEmpty(theme.config.footer.copyright) ? 'Pure Lab' : theme.config.footer.copyright}|"
@@ -44,30 +66,66 @@ import Icon from "./Icon.astro";
               站点条款
             </a>
           </th:block>
+          <th:block
+            th:if="${theme.config.footer.links != null and not #lists.isEmpty(theme.config.footer.links)}"
+            th:each="footerLink : ${theme.config.footer.links}"
+          >
+            <th:block th:if="${footerLink.position == 2}">
+              <span> &amp; </span>
+              <a
+                th:href="${footerLink.link}"
+                th:text="${footerLink.title}"
+                th:classappend="${footerLink.style}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Footer link
+              </a>
+            </th:block>
+          </th:block>
         </div>
         <span
           th:if="${theme.config.footer.show_powered == null or theme.config.footer.show_powered}"
         >
           <a href="https://www.halo.run/" target="_blank">Halo</a>
           &amp;
-          <a
-            href="https://github.com/cworld1/astro-theme-pure"
-            target="_blank">Pure</a
+          <a href="https://github.com/cworld1/astro-theme-pure" target="_blank"
+            >Pure</a
           >
           theme powered
         </span>
       </div>
 
       <div class="flex items-center gap-x-4">
+        <th:block
+          th:if="${theme.config.footer.social != null and not #lists.isEmpty(theme.config.footer.social)}"
+          th:each="social : ${theme.config.footer.social}"
+        >
+          <a th:href="${social.href}" rel="me">
+            <span class="sr-only" th:text="${social.label}">Social link</span>
+            <svg
+              aria-hidden="true"
+              class="size-6"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              set:html={'<use th:href="|#pure-icon-${social.icon}|"></use>'}
+            />
+          </a>
+        </th:block>
         <a
-          th:if="${theme.config.footer.show_github == null or theme.config.footer.show_github}"
+          th:if="${(theme.config.footer.social == null or #lists.isEmpty(theme.config.footer.social)) and (theme.config.footer.show_github == null or theme.config.footer.show_github)}"
           href="https://github.com/DanielZhangyc/astro-pure-halo"
           rel="me"
         >
           <span class="sr-only">GitHub</span>
           <Icon name="github" />
         </a>
-        <a th:if="${theme.config.footer.show_rss == null or theme.config.footer.show_rss}" href="/rss.xml">
+        <a
+          th:if="${(theme.config.footer.social == null or #lists.isEmpty(theme.config.footer.social)) and (theme.config.footer.show_rss == null or theme.config.footer.show_rss)}"
+          href="/rss.xml"
+        >
           <span class="sr-only">RSS</span>
           <Icon name="rss" />
         </a>

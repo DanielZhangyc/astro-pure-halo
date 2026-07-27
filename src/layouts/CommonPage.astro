@@ -15,7 +15,9 @@ const { title, comment = false, view = false } = Astro.props;
 
 <ContentLayout>
   <Fragment slot="head">
-    <title th:text={`|${title} • \${site.title}|`}>
+    <title
+      th:text={`|${title} \${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} \${site.title}|`}
+    >
       {title} • Astro Theme Pure
     </title>
   </Fragment>

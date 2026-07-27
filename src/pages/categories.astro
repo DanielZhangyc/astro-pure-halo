@@ -9,7 +9,9 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|Categories • ${site.title}|">
+    <title
+      th:text="|Categories ${#strings.isEmpty(theme.config.general.title_delimiter) ? '•' : theme.config.general.title_delimiter} ${site.title}|"
+    >
       Categories • Astro Theme Pure
     </title>
   </Fragment>

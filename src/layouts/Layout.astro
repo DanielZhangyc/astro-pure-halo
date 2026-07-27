@@ -308,6 +308,7 @@ const { highlightColor = "#659EB9", socialCard = true } = Astro.props;
             ? document.body.dataset.externalLinkContent || ""
             : " ↗";
           if (
+            !link.hasAttribute("data-no-external-marker") &&
             markerContent &&
             !link.querySelector("[data-pure-external-marker]")
           ) {

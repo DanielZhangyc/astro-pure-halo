@@ -5,6 +5,19 @@
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-07-27
+
+### Added
+
+- 增加由 `main` 成功 CI 自动创建同版本 GitHub Release 和上传主题 ZIP 的流程，
+  同时支持维护者从 Actions 页面输入版本号进行幂等重试。
+
+### Fixed
+
+- 修复 Pure Blog 自定义页面一次加载全部文章导致的加载错误，改用 Halo
+  服务端分页。
+- 修复友链卡片显示多余外链标记的问题。
+
 ## [0.1.7] - 2026-07-27
 
 ### Added
@@ -21,5 +34,6 @@
 
 - 移除授权来源不明确的 Satoshi 字体文件。
 
-[Unreleased]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.7...HEAD
+[Unreleased]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.6...v0.1.7

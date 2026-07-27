@@ -3,10 +3,10 @@
 ## 分支职责
 
 ```text
-feat/* ─┐
-fix/*  ─┼─ PR ─> dev ─> release/vX.Y.Z ─ PR ─> main ─> vX.Y.Z Release ─> Halo CD
-docs/* ─┘                                      │
-                                               └─ PR ─> dev（版本回灌）
+feature/* ─┐
+fix/*     ─┼─ PR ─> dev ─> release/vX.Y.Z ─ PR ─> main ─> CI ─> vX.Y.Z Release
+docs/*    ─┘                                      │
+                                                  └─ PR ─> dev（版本回灌）
 
 main ─> hotfix/vX.Y.Z ─ PR ─> main ─> vX.Y.Z Release
                                   └─ PR ─> dev（修复回灌）
@@ -14,8 +14,9 @@ main ─> hotfix/vX.Y.Z ─ PR ─> main ─> vX.Y.Z Release
 
 - `main`：稳定、可安装、可回退的版本账本。每次更新都必须是一个完整的新版本。
 - `dev`：下一版本的集成分支。普通开发只向这里提交 Pull Request。
-- `feat/*`、`fix/*`、`docs/*`、`refactor/*`、`perf/*`、`test/*`、
+- `feature/*`、`fix/*`、`docs/*`、`refactor/*`、`perf/*`、`test/*`、
   `build/*`、`ci/*`、`chore/*`：从 `dev` 创建，不修改发布版本号。
+  已有的 `feat/*` 仍被兼容，新功能优先使用 `feature/*`。
 - `release/vX.Y.Z`：从最新 `dev` 创建，只做发布收口、版本号和变更记录更新。
 - `hotfix/vX.Y.Z`：从 `main` 创建，用于已发布版本的紧急修复。
 
@@ -29,7 +30,7 @@ main ─> hotfix/vX.Y.Z ─ PR ─> main ─> vX.Y.Z Release
 git fetch origin
 git switch dev
 git pull --ff-only origin dev
-git switch -c feat/example
+git switch -c feature/example
 ```
 
 完成后推送分支，并创建以 `dev` 为 base 的 Pull Request。仓库只使用 Squash
@@ -53,37 +54,33 @@ git switch -c release/v0.2.0
    `dist/astro-pure-halo-0.2.0.zip`。
 4. 创建以 `main` 为 base 的 Pull Request，等待全部必选检查通过后 Squash
    merge。
-5. 在合入后的 `main` 提交上创建并发布 `v0.2.0` GitHub Release。Halo 官方 CD
-   会重新构建并把 ZIP 上传到该 Release。
+5. 合入 `main` 后等待 CI。CI 成功后，Release 工作流读取人为填写在发布分支中的
+   `0.2.0`，自动创建 `v0.2.0` tag 和 GitHub Release，并上传主题 ZIP。
 6. 创建 `main` 到 `dev` 的同步 Pull Request，使两个长期分支拥有相同的发布
    版本基线。
 
 不要修改已经发布版本的 tag 或 ZIP；有任何修复都发布更高版本。
 
-## Halo 应用市场自动发布
+## GitHub Release 自动发布
 
-当前 `.github/workflows/cd.yaml` 使用 Halo 官方
-`halo-sigs/reusable-workflows/.github/workflows/theme-cd.yaml@v4`，并设置
-`skip-appstore-release: true`，所以首次审核前只上传 GitHub Release 资产。
+`.github/workflows/release.yaml` 在 `main` 的 CI 成功后自动运行。版本不是根据
+提交信息推算，也不会自动增加；维护者在 `release/vX.Y.Z` 或
+`hotfix/vX.Y.Z` 中明确修改以下三处：
 
-首次审核通过后：
+1. 分支名中的 `X.Y.Z`；
+2. `package.json` 的 `version`；
+3. `theme.yaml` 的 `spec.version`。
 
-1. 在 Halo 应用管理页面取得应用 ID。
-2. 在 Halo 官网个人中心创建个人令牌，权限选择“应用市场开发者 > 版本管理”。
-3. 在 GitHub 仓库 `Settings > Secrets and variables > Actions` 创建
-   `HALO_PAT`。
-4. 将 CD 的 `skip-appstore-release: true` 替换为：
+三者以及 `CHANGELOG.md` 必须一致，PR policy 才允许合入 `main`。因此 Release
+虽然自动创建，版本决策仍然完全由维护者掌握。
 
-   ```yaml
-   secrets:
-     halo-pat: ${{ secrets.HALO_PAT }}
-   with:
-     app-id: app-xxxxxxxx
-     node-version: "24"
-     pnpm-version: ""
-   ```
+工作流直接使用仓库的 `GITHUB_TOKEN` 创建 tag、Release 并上传
+`astro-pure-halo-X.Y.Z.zip`，无需个人令牌，也不会连接 Halo 应用市场。
 
-令牌只放 GitHub Actions Secret，不写入仓库，也不是本地 Halo 后台令牌。
+如果自动运行被临时故障中断，可以在 `Actions > Release > Run workflow` 中选择
+`main` 并手动输入版本号。手动值仍必须与 `main` 中的两个版本文件一致；它用于
+确认和重试，不允许绕过发布 PR 擅自指定另一个版本。流程是幂等的：同一 tag 和
+ZIP 已存在时不会覆盖发布制品。
 
 ## GitHub 仓库合并设置
 
@@ -123,7 +120,8 @@ Bypass list 保持空；单人维护阶段也不要给管理员永久绕过。�
 
 - **Restrict creations**：`main` 已存在，没有额外收益。
 - **Restrict updates**：它只允许 bypass 用户更新分支，会连正常 PR 合入一起封死。
-- **Require deployments to succeed**：Halo CD 在 Release 发布后运行，不是 PR 前部署。
+- **Require deployments to succeed**：GitHub Release 在合入后的 CI 成功后运行，
+  不是 PR 前部署。
 - **Require signed commits**：等所有维护者和自动化都完成签名配置后再启用，否则会
   无谓阻塞 Squash merge。
 - Code scanning、code quality、coverage：只有先接入相应结果提供方后再启用；空
@@ -163,13 +161,13 @@ GitHub Ruleset 本身不能限定 PR 的来源分支，所以必须把
 - **Block force pushes**
 
 不要限制 tag 创建；否则没有 bypass 身份时连正常 GitHub Release 都无法创建。
-CD 中的 Release policy 会进一步验证 tag 名、两个版本文件、变更记录，以及 tag
-指向的提交是否已经包含在 `main`。
+Release 工作流会进一步验证 tag 名、两个版本文件、变更记录，以及发布提交是否
+已经包含在 `main`。
 
 ## 初次迁移顺序
 
 1. 从当前 `origin/main` 创建并推送 `dev`，不要携带尚未发布的工作区改动。
-2. 先把 CI、Policy 和 CD 作为一个版本发布到 `main`。
+2. 先把 CI、Policy 和 Release 工作流作为一个版本发布到 `main`。
 3. 通过 `main` 到 `dev` 的 Pull Request 同步发布后的基线。
 4. 创建两个 Branch ruleset，先用 Evaluate 观察一次 PR。
 5. 在 Ruleset 中选择已经出现的 `CI validate` 与 `PR policy`，然后切换

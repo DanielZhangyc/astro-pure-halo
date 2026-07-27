@@ -155,7 +155,7 @@ if (baseRef === "dev") {
   }
 
   const developmentBranchPattern =
-    /^(feat|fix|docs|refactor|perf|test|build|ci|chore)\/[a-z0-9][a-z0-9._/-]*$/;
+    /^(feat|feature|fix|docs|refactor|perf|test|build|ci|chore)\/[a-z0-9][a-z0-9._/-]*$/;
   const agentBranchPattern = /^codex\/[a-z0-9][a-z0-9._/-]*$/;
   if (
     !developmentBranchPattern.test(headRef) &&

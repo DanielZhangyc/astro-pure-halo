@@ -265,7 +265,7 @@ spec:
         - $formkit: number
           name: blog_page_size
           label: Blog 每页文章数
-          help: 用于 Pure Blog 自定义页面的客户端分页。
+          help: 用于 Pure Blog 自定义页面的服务端分页。
           min: 1
           max: 100
           value: 8

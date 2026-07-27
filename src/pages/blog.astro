@@ -1,8 +1,8 @@
 ---
 /*
  * Direct Halo port of Pure src/pages/blog/[...page].astro.
- * Halo custom pages do not receive a URL-aware paginated post collection.
- * All posts are rendered once and the Pure paginator is adapted client-side.
+ * Halo custom pages do not receive a URL-aware paginated post collection, so
+ * the page query parameter is passed to Halo's paginated PostFinder instead.
  */
 import Icon from "../components/Icon.astro";
 import PureButton from "../components/PureButton.astro";
@@ -19,21 +19,24 @@ import Layout from "../layouts/Layout.astro";
     <meta name="description" content="Some posts or archives of my blog" />
   </Fragment>
 
-  <th:block th:with="blogPosts = ${postFinder.listAll()}">
+  <th:block
+    th:with="purePageSizeValue=${theme.config.content.blog_page_size},
+             purePageSizeText=${purePageSizeValue == null ? '' : purePageSizeValue.toString()},
+             purePageSize=${purePageSizeText.matches('^(?:[1-9]|[1-9][0-9]|100)$') ? purePageSizeText : '8'},
+             pureRequestedPage=${not #lists.isEmpty(param.page) and param.page[0].matches('^[1-9][0-9]{0,5}$') ? param.page[0] : 1},
+             requestedPosts=${postFinder.list({page: pureRequestedPage, size: purePageSize})},
+             blogPosts=${requestedPosts.total gt 0 and #lists.isEmpty(requestedPosts.items) ? postFinder.list({page: requestedPosts.totalPages, size: purePageSize}) : requestedPosts},
+             pureTags=${tagFinder.list(1, 50).items}"
+  >
     <PureButton title="Back" href="/" variant="back" />
-    <main
-      id="pure-blog"
-      class="mt-6 lg:mt-10"
-      th:with="purePageSize=${theme.config.content.blog_page_size == null or theme.config.content.blog_page_size lt 1 ? 8 : theme.config.content.blog_page_size}"
-      th:attr="data-page-size=${purePageSize}"
-    >
+    <main class="mt-6 lg:mt-10">
       <div id="content-header" class="animate">
         <h1 class="mb-6 mt-6 text-3xl font-medium sm:mt-10">Blog</h1>
       </div>
 
-      <p th:if="${#lists.isEmpty(blogPosts)}">No posts yet.</p>
+      <p th:if="${blogPosts.total eq 0}">No posts yet.</p>
       <div
-        th:if="${not #lists.isEmpty(blogPosts)}"
+        th:if="${blogPosts.total gt 0}"
         class="grid gap-y-16 sm:grid-cols-[3fr_1fr] sm:gap-x-8"
       >
         <section aria-label="Blog posts list" class="animate" id="content">
@@ -41,9 +44,8 @@ import Layout from "../layouts/Layout.astro";
             class="mb-3 flex flex-col justify-between text-sm sm:mb-5 sm:flex-row"
           >
             <span
-              id="blog-page-summary"
               class="text-muted-foreground"
-              th:text="|Page 1 - Showing ${#lists.size(blogPosts) gt purePageSize ? purePageSize : #lists.size(blogPosts)} of ${#lists.size(blogPosts)} posts|"
+              th:text="|Page ${blogPosts.page} - Showing ${#lists.size(blogPosts.items)} of ${blogPosts.total} posts|"
             >
               Page 1 - Showing 8 of 8 posts
             </span>
@@ -52,118 +54,60 @@ import Layout from "../layouts/Layout.astro";
             </a>
           </div>
 
-          <div id="blog-post-list">
-            <th:block
-              th:replace="~{fragments/post-list :: postList(postItems=${blogPosts})}"
-            ></th:block>
-          </div>
+          <th:block
+            th:replace="~{fragments/post-list :: postList(postItems=${blogPosts.items})}"
+          ></th:block>
           <nav
-            id="blog-pagination"
-            th:if="${#lists.size(blogPosts) gt purePageSize}"
+            th:if="${blogPosts.totalPages gt 1}"
             class="mt-4 flex items-center gap-x-4 sm:mt-6"
             aria-label="Pagination"
           >
-            <a id="blog-previous" class="me-auto py-2" href="/blog">
+            <a
+              th:if="${blogPosts.hasPrevious()}"
+              th:href="${blogPosts.page eq 2 ? '/blog' : '/blog?page=' + (blogPosts.page - 1)}"
+              class="me-auto py-2"
+              href="/blog"
+            >
               ← Previous Posts
             </a>
-            <a id="blog-next" class="ms-auto py-2" href="/blog?page=2">
+            <a
+              th:if="${blogPosts.hasNext()}"
+              th:href="|/blog?page=${blogPosts.page + 1}|"
+              class="ms-auto py-2"
+              href="/blog?page=2"
+            >
               Next Posts →
             </a>
           </nav>
         </section>
 
-        <th:block th:with="pureTags = ${tagFinder.listAll()}">
-          <aside
-            class="animate"
-            id="sidebar"
-            th:if="${not #lists.isEmpty(pureTags)}"
-          >
-            <h2 class="mb-4 flex items-center text-lg font-medium">
-              <Icon name="tag-2" class="me-2" />
-              Tags
-            </h2>
-            <ul class="text-bgColor flex flex-wrap gap-2">
-              <li th:each="pureTag : ${pureTags}">
-                <a
-                  th:href="${pureTag.status.permalink}"
-                  class="group inline-flex items-center gap-x-1 rounded-xl bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
-                  th:text="${pureTag.spec.displayName}"
-                >
-                  Tag
-                </a>
-              </li>
-            </ul>
-            <span class="mt-4 block sm:text-end">
-              <a aria-label="View all blog categories" href="/tags">
-                View all →
+        <aside
+          class="animate"
+          id="sidebar"
+          th:if="${not #lists.isEmpty(pureTags)}"
+        >
+          <h2 class="mb-4 flex items-center text-lg font-medium">
+            <Icon name="tag-2" class="me-2" />
+            Tags
+          </h2>
+          <ul class="text-bgColor flex flex-wrap gap-2">
+            <li th:each="pureTag : ${pureTags}">
+              <a
+                th:href="${pureTag.status.permalink}"
+                class="group inline-flex items-center gap-x-1 rounded-xl bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline"
+                th:text="${pureTag.spec.displayName}"
+              >
+                Tag
               </a>
-            </span>
-          </aside>
-        </th:block>
+            </li>
+          </ul>
+          <span class="mt-4 block sm:text-end">
+            <a aria-label="View all blog categories" href="/tags">
+              View all →
+            </a>
+          </span>
+        </aside>
       </div>
     </main>
   </th:block>
-
-  <script>
-    const blogPostList = document.querySelector<HTMLElement>(
-      "#blog-post-list > ul",
-    );
-    const blogPostItems = Array.from(
-      blogPostList?.children || [],
-    ) as HTMLElement[];
-    const blogPageSummary = document.getElementById("blog-page-summary");
-    const blogPagination = document.getElementById("blog-pagination");
-    const blogPrevious = document.getElementById(
-      "blog-previous",
-    ) as HTMLAnchorElement | null;
-    const blogNext = document.getElementById(
-      "blog-next",
-    ) as HTMLAnchorElement | null;
-
-    if (blogPostList && blogPostItems.length > 0) {
-      const requestedPageSize = Number(
-        document.getElementById("pure-blog")?.dataset.pageSize || "8",
-      );
-      const pageSize =
-        Number.isFinite(requestedPageSize) && requestedPageSize >= 1
-          ? Math.floor(requestedPageSize)
-          : 8;
-      const totalPages = Math.ceil(blogPostItems.length / pageSize);
-      const requestedPage = Number(
-        new URLSearchParams(window.location.search).get("page") || "1",
-      );
-      const currentPage = Number.isInteger(requestedPage)
-        ? Math.min(Math.max(requestedPage, 1), totalPages)
-        : 1;
-      const start = (currentPage - 1) * pageSize;
-      const end = Math.min(start + pageSize, blogPostItems.length);
-
-      blogPostItems.forEach((item, index) => {
-        item.hidden = index < start || index >= end;
-      });
-      blogPostList.dataset.ready = "true";
-
-      if (blogPageSummary) {
-        blogPageSummary.textContent = `Page ${currentPage} - Showing ${end - start} of ${blogPostItems.length} posts`;
-      }
-      if (blogPagination) {
-        blogPagination.hidden = totalPages <= 1;
-      }
-      if (blogPrevious) {
-        blogPrevious.hidden = currentPage <= 1;
-        blogPrevious.href =
-          currentPage === 2 ? "/blog" : `/blog?page=${currentPage - 1}`;
-      }
-      if (blogNext) {
-        blogNext.hidden = currentPage >= totalPages;
-        blogNext.href = `/blog?page=${currentPage + 1}`;
-      }
-    }
-  </script>
-
-  <style is:global>
-    #blog-post-list > ul:not([data-ready]) > .post-preview:nth-child(n + 9) {
-      display: none;
-    }
-  </style>
 </Layout>

@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version in X.Y.Z form; must match package.json and theme.yaml on main
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish GitHub release
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.conclusion == 'success'
+      )
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      REQUESTED_VERSION: ${{ inputs.version }}
+    steps:
+      - name: Checkout release commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+          fetch-depth: 0
+      - name: Fetch main and tags
+        run: git fetch --force origin main:refs/remotes/origin/main --tags
+      - name: Resolve human-selected version
+        id: release
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.ref }}" != "refs/heads/main" ]]; then
+            echo "Manual releases must run from the main branch." >&2
+            exit 1
+          fi
+
+          repository_version="$(node -p "require('./package.json').version")"
+
+          if [[ ! "${repository_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "package.json must use a stable X.Y.Z version." >&2
+            exit 1
+          fi
+
+          if [[ -n "${REQUESTED_VERSION}" && "${REQUESTED_VERSION}" != "${repository_version}" ]]; then
+            echo "Requested version ${REQUESTED_VERSION} does not match repository version ${repository_version}." >&2
+            exit 1
+          fi
+
+          echo "version=${repository_version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=v${repository_version}" >> "${GITHUB_OUTPUT}"
+      - name: Validate release metadata
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: node scripts/verify-release-tag.mjs
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: ""
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Halo package
+        run: pnpm build
+      - name: Create release and upload package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          archive="dist/astro-pure-halo-${RELEASE_VERSION}.zip"
+          test -f "${archive}"
+
+          if git show-ref --verify --quiet "refs/tags/${RELEASE_TAG}"; then
+            tag_sha="$(git rev-list -n 1 "${RELEASE_TAG}")"
+            if [[ "${tag_sha}" != "${RELEASE_SHA}" ]]; then
+              echo "${RELEASE_TAG} already points to ${tag_sha}, expected ${RELEASE_SHA}." >&2
+              exit 1
+            fi
+          fi
+
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            if gh release view "${RELEASE_TAG}" --json assets --jq '.assets[].name' |
+              grep -Fx "astro-pure-halo-${RELEASE_VERSION}.zip" >/dev/null; then
+              echo "${RELEASE_TAG} and its package already exist; leaving the published asset unchanged."
+              exit 0
+            fi
+
+            gh release upload "${RELEASE_TAG}" "${archive}"
+            exit 0
+          fi
+
+          if git show-ref --verify --quiet "refs/tags/${RELEASE_TAG}"; then
+            gh release create "${RELEASE_TAG}" "${archive}" \
+              --verify-tag \
+              --title "${RELEASE_TAG}" \
+              --generate-notes \
+              --latest
+          else
+            gh release create "${RELEASE_TAG}" "${archive}" \
+              --target "${RELEASE_SHA}" \
+              --title "${RELEASE_TAG}" \
+              --generate-notes \
+              --latest
+          fi

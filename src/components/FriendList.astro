@@ -38,7 +38,7 @@ const getAvatar = (friend: Friend) => {
             <div class="relative z-10 flex h-full items-center gap-3">
               <div class="relative h-14 w-14 min-w-14 overflow-hidden rounded-full">
                 <img
-                  class="my-0 bg-card"
+                  class="my-0 h-full w-full bg-card"
                   th:src="${#strings.isEmpty(friend.avatar) ? '/themes/astro-pure-halo/assets/pure/favicon/favicon-32x32.png' : friend.avatar}"
                   th:attr="data-favicon-link=${#strings.isEmpty(friend.avatar) ? friend.link : null}"
                   src="/themes/astro-pure-halo/assets/pure/avatar.webp"
@@ -117,7 +117,7 @@ const getAvatar = (friend: Friend) => {
             <div class="relative z-10 flex h-full items-center gap-3">
               <div class="relative h-14 w-14 min-w-14 overflow-hidden rounded-full">
                 <img
-                  class="my-0 bg-card"
+                  class="my-0 h-full w-full bg-card"
                   src={getAvatar(friend)}
                   height="80"
                   width="80"

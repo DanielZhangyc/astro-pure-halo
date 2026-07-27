@@ -17,7 +17,7 @@ spec:
   customTemplates:
     page:
       - name: Pure Blog
-        description: 与 Astro Theme Pure 的 Blog 页面完全一致的文章列表。
+        description: 延续 Astro Theme Pure 信息层级与交互的文章列表。
         screenshot:
         file: blog.html
       - name: Pure Links
@@ -30,11 +30,11 @@ spec:
         file: terms.html
     category:
       - name: Pure Blog Category
-        description: 与 Astro Theme Pure 的 Blog 页面完全一致的分类文章列表。
+        description: 延续 Astro Theme Pure 信息层级与交互的分类文章列表。
         screenshot:
         file: category-blog.html
-  version: "0.1.6"
-  requires: ">=2.22.0"
+  version: "0.1.7"
+  requires: ">=2.25.0"
   license:
     - name: "Apache-2.0"
       url: "https://github.com/DanielZhangyc/astro-pure-halo/blob/main/LICENSE"

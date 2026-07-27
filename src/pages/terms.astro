@@ -20,8 +20,8 @@ import ContentLayout from "../layouts/ContentLayout.astro";
     <div class="text-sm text-muted-foreground">
       生效日期：
       <time
-        th:text="${#strings.isEmpty(theme.config.pages_terms.effective_date) ? '2026-07-27' : theme.config.pages_terms.effective_date}"
-        >2026-07-27</time
+        th:text="${#strings.isEmpty(theme.config.pages_terms.effective_date) ? #dates.format(#dates.createNow(), 'yyyy-MM-dd') : theme.config.pages_terms.effective_date}"
+        >Current date</time
       >
     </div>
   </Fragment>

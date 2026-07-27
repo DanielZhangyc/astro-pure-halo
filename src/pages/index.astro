@@ -28,7 +28,7 @@ import Layout from "../layouts/Layout.astro";
       <img
         src="/themes/astro-pure-halo/assets/pure/avatar.png"
         th:src="${not #strings.isEmpty(theme.config.home.avatar) ? theme.config.home.avatar : (not #strings.isEmpty(site.logo) ? site.logo : '/themes/astro-pure-halo/assets/pure/avatar.png')}"
-        th:alt="${#strings.isEmpty(theme.config.home.profile_name) ? 'Pure Lab' : theme.config.home.profile_name}"
+        th:alt="${#strings.isEmpty(theme.config.home.profile_name) ? site.title : theme.config.home.profile_name}"
         alt="Avatar"
         class="h-28 w-auto rounded-full border p-1"
         loading="eager"
@@ -38,24 +38,25 @@ import Layout from "../layouts/Layout.astro";
       <div class="flex flex-col items-center gap-y-4">
         <h1
           class="text-3xl font-medium"
-          th:text="${#strings.isEmpty(theme.config.home.profile_name) ? 'Pure Lab' : theme.config.home.profile_name}"
+          th:text="${#strings.isEmpty(theme.config.home.profile_name) ? site.title : theme.config.home.profile_name}"
         >
-          Pure Lab
+          Site title
         </h1>
         <div class="flex flex-wrap justify-center gap-x-7 gap-y-3">
-          <div class="flex flex-row items-center justify-center gap-x-2">
+          <div
+            th:if="${not #strings.isEmpty(theme.config.home.location)}"
+            class="flex flex-row items-center justify-center gap-x-2"
+          >
             <Icon name="location" class="size-5" />
-            <p
-              th:text="${#strings.isEmpty(theme.config.home.location) ? 'Somewhere' : theme.config.home.location}"
-            >
-              Somewhere
-            </p>
+            <p th:text="${theme.config.home.location}">Location</p>
           </div>
           <a
+            th:if="${not #strings.isEmpty(theme.config.home.source_url)}"
             class="flex flex-row items-center justify-center gap-x-2 hover:opacity-75 transition-all"
-            th:href="${#strings.isEmpty(theme.config.home.source_url) ? 'https://github.com/cworld1/astro-theme-pure' : theme.config.home.source_url}"
-            href="https://github.com/cworld1/astro-theme-pure"
+            th:href="${theme.config.home.source_url}"
+            href="/"
             target="_blank"
+            rel="noopener noreferrer"
           >
             <Icon name="github" class="size-5" />
             <p
@@ -76,18 +77,16 @@ import Layout from "../layouts/Layout.astro";
         <div class="flex flex-1 flex-col gap-y-3">
           <p
             class="text-muted-foreground"
-            th:text="${#strings.isEmpty(theme.config.home.role) ? 'Developer / Designer' : theme.config.home.role}"
+            th:text="${#strings.isEmpty(theme.config.home.role) ? site.subtitle : theme.config.home.role}"
           >
-            Developer / Designer
+            Site description
           </p>
           <p
+            th:if="${not #strings.isEmpty(theme.config.home.about)}"
             class="text-muted-foreground"
-            th:text="${#strings.isEmpty(theme.config.home.about) ? 'Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem denique mea id. Usu ei regione indoctum dissentiunt, cu meliore fuisset mei, vel quod voluptua ne. Ex dicat impedit mel, at eum oratio possit voluptatum.' : theme.config.home.about}"
+            th:text="${theme.config.home.about}"
           >
-            Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem denique mea
-            id. Usu ei regione indoctum dissentiunt, cu meliore fuisset mei, vel
-            quod voluptua ne. Ex dicat impedit mel, at eum oratio possit
-            voluptatum.
+            Additional profile details.
           </p>
           <PureButton
             title="More about me"
@@ -175,27 +174,12 @@ import Layout from "../layouts/Layout.astro";
 
       <section
         class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
-        th:if="${(theme.config.home.show_education == null or theme.config.home.show_education) and (theme.config.home.education_items == null or not #lists.isEmpty(theme.config.home.education_items))}"
+        th:if="${theme.config.home.show_education == true and theme.config.home.education_items != null and not #lists.isEmpty(theme.config.home.education_items)}"
       >
         <div class="text-xl font-medium md:min-w-36">
           <h2>Education</h2>
         </div>
         <div class="flex flex-1 flex-col gap-y-3">
-          <a
-            th:if="${theme.config.home.education_items == null}"
-            class="not-prose block relative rounded-2xl border bg-muted px-5 py-3 transition-all hover:border-foreground/25 hover:shadow-sm"
-            href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          >
-            <div class="flex flex-col gap-y-1.5">
-              <div class="flex flex-col gap-y-0.5">
-                <h2 class="text-lg font-medium">Lorem ipsum</h2>
-                <p class="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, vidit suscipit at mei.
-                </p>
-                <p class="text-muted-foreground">August 2021 - July 2025</p>
-              </div>
-            </div>
-          </a>
           <a
             th:each="education : ${theme.config.home.education_items}"
             th:href="${#strings.isEmpty(education.url) ? null : education.url}"
@@ -204,16 +188,16 @@ import Layout from "../layouts/Layout.astro";
             <div class="flex flex-col gap-y-1.5">
               <div class="flex flex-col gap-y-0.5">
                 <h2 class="text-lg font-medium" th:text="${education.title}">
-                  Lorem ipsum
+                  Education
                 </h2>
                 <p
                   class="text-muted-foreground"
                   th:text="${education.description}"
                 >
-                  Lorem ipsum dolor sit amet, vidit suscipit at mei.
+                  Education details
                 </p>
                 <p class="text-muted-foreground" th:text="${education.date}">
-                  August 2021 - July 2025
+                  Date
                 </p>
               </div>
             </div>
@@ -223,71 +207,19 @@ import Layout from "../layouts/Layout.astro";
 
       <section
         class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
-        th:if="${(theme.config.home.show_websites == null or theme.config.home.show_websites) and (theme.config.home.website_items == null or not #lists.isEmpty(theme.config.home.website_items))}"
+        th:if="${theme.config.home.show_websites == true and theme.config.home.website_items != null and not #lists.isEmpty(theme.config.home.website_items)}"
       >
         <div class="text-xl font-medium md:min-w-36">
           <h2>Website List</h2>
         </div>
         <div class="flex flex-1 flex-col gap-y-3">
-          <div
-            class="grid grid-cols-1 gap-3 sm:grid-cols-2"
-            th:if="${theme.config.home.website_items == null}"
-          >
-            {
-              [
-                {
-                  image: "1.avif",
-                  title: "Lorem ipsum",
-                  subtitle: "Do not go gentle into that good night",
-                  href: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                },
-                {
-                  image: "2.avif",
-                  title: "Lorem ipsum",
-                  subtitle: "Old age burn and rave at close of day",
-                  href: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                },
-                {
-                  image: "3.avif",
-                  title: "Lorem ipsum",
-                  subtitle: "Rage, rage against the dying of the light",
-                  href: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                },
-                {
-                  image: "4.avif",
-                  title: "More projects",
-                  subtitle: "Check out more projects",
-                  href: "/projects",
-                },
-              ].map((project) => (
-                <a
-                  class="project-card group overflow-hidden relative flex flex-col justify-end rounded-2xl border bg-muted transition-all hover:border-foreground/25 hover:shadow-sm"
-                  href={project.href}
-                  target="_blank"
-                >
-                  <img
-                    src={`/themes/astro-pure-halo/assets/pure/projects/${project.image}`}
-                    alt={project.title}
-                    class="absolute w-full h-full object-cover opacity-60 transition-opacity group-hover:opacity-100 dark:opacity-35"
-                    loading="lazy"
-                  />
-                  <div class="project-card-fg z-10 flex flex-col gap-y-0.5 px-5 pb-4 pt-36 transition-all">
-                    <h2 class="text-lg font-medium">{project.title}</h2>
-                    <p class="text-muted-foreground">{project.subtitle}</p>
-                  </div>
-                </a>
-              ))
-            }
-          </div>
-          <div
-            class="grid grid-cols-1 gap-3 sm:grid-cols-2"
-            th:if="${theme.config.home.website_items != null}"
-          >
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <a
               th:each="website : ${theme.config.home.website_items}"
               th:href="${#strings.isEmpty(website.url) ? null : website.url}"
               class="project-card group overflow-hidden relative flex flex-col justify-end rounded-2xl border bg-muted transition-all hover:border-foreground/25 hover:shadow-sm"
               th:target="${#strings.isEmpty(website.url) ? null : '_blank'}"
+              rel="noopener noreferrer"
             >
               <img
                 src="/themes/astro-pure-halo/assets/pure/projects/1.avif"
@@ -301,10 +233,10 @@ import Layout from "../layouts/Layout.astro";
                 class="project-card-fg z-10 flex flex-col gap-y-0.5 px-5 pb-4 pt-36 transition-all"
               >
                 <h2 class="text-lg font-medium" th:text="${website.title}">
-                  Lorem ipsum
+                  Website
                 </h2>
                 <p class="text-muted-foreground" th:text="${website.subtitle}">
-                  Do not go gentle into that good night
+                  Website description
                 </p>
               </div>
             </a>
@@ -314,32 +246,12 @@ import Layout from "../layouts/Layout.astro";
 
       <section
         class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
-        th:if="${(theme.config.home.show_certifications == null or theme.config.home.show_certifications) and (theme.config.home.certification_items == null or not #lists.isEmpty(theme.config.home.certification_items))}"
+        th:if="${theme.config.home.show_certifications == true and theme.config.home.certification_items != null and not #lists.isEmpty(theme.config.home.certification_items)}"
       >
         <div class="text-xl font-medium md:min-w-36">
           <h2>Certifications</h2>
         </div>
         <div class="flex flex-1 flex-col gap-y-3">
-          <a
-            th:if="${theme.config.home.certification_items == null}"
-            class="not-prose block relative rounded-2xl border bg-muted px-5 py-3 transition-all hover:border-foreground/25 hover:shadow-sm"
-            href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          >
-            <div class="flex flex-col gap-y-1.5">
-              <div class="flex flex-col gap-y-0.5">
-                <h2 class="text-lg font-medium">Lorem ipsum</h2>
-                <p class="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem
-                  denique mea id. Usu ei regione indoctum dissentiunt, cu
-                  meliore fuisset mei, vel quod voluptua ne. Ex dicat impedit
-                  mel, at eum oratio possit voluptatum. Dicat ceteros cu vim.
-                  Impetus fuisset ullamcorper pri cu, his posse iisque ad,
-                  aliquam honestatis usu id.
-                </p>
-                <p class="text-muted-foreground">July 2024</p>
-              </div>
-            </div>
-          </a>
           <a
             th:each="certification : ${theme.config.home.certification_items}"
             th:href="${#strings.isEmpty(certification.url) ? null : certification.url}"
@@ -351,19 +263,19 @@ import Layout from "../layouts/Layout.astro";
                   class="text-lg font-medium"
                   th:text="${certification.title}"
                 >
-                  Lorem ipsum
+                  Certification
                 </h2>
                 <p
                   class="text-muted-foreground"
                   th:text="${certification.description}"
                 >
-                  Lorem ipsum dolor sit amet.
+                  Certification details
                 </p>
                 <p
                   class="text-muted-foreground"
                   th:text="${certification.date}"
                 >
-                  July 2024
+                  Date
                 </p>
               </div>
             </div>
@@ -373,36 +285,12 @@ import Layout from "../layouts/Layout.astro";
 
       <section
         class="flex flex-col gap-y-5 md:flex-row md:gap-y-0"
-        th:if="${(theme.config.home.show_skills == null or theme.config.home.show_skills) and (theme.config.home.skill_groups == null or not #lists.isEmpty(theme.config.home.skill_groups))}"
+        th:if="${theme.config.home.show_skills == true and theme.config.home.skill_groups != null and not #lists.isEmpty(theme.config.home.skill_groups)}"
       >
         <div class="text-xl font-medium md:min-w-36">
           <h2>Skills</h2>
         </div>
         <div class="flex flex-1 flex-col gap-y-3">
-          <th:block th:if="${theme.config.home.skill_groups == null}">
-            {
-              [
-                {
-                  title: "Languages",
-                  skills: ["Html", "JavaScript", "CSS", "Shell"],
-                },
-                {
-                  title: "Frontend",
-                  skills: ["TypeScript", "Vite", "Webpack", "Astro"],
-                },
-                { title: "Backend", skills: ["Vercel", "Waline"] },
-              ].map((group) => (
-                <div class="flex flex-col gap-y-2 md:flex-row md:gap-x-5 md:gap-y-0">
-                  <h3 class="w-1/5 font-medium">{group.title}</h3>
-                  <div class="flex flex-row flex-wrap gap-x-4 gap-y-2 md:w-4/5">
-                    {group.skills.map((skill) => (
-                      <PureButton as="button" title={skill} variant="pill" />
-                    ))}
-                  </div>
-                </div>
-              ))
-            }
-          </th:block>
           <div
             th:each="skillGroup : ${theme.config.home.skill_groups}"
             class="flex flex-col gap-y-2 md:flex-row md:gap-x-5 md:gap-y-0"
@@ -425,8 +313,8 @@ import Layout from "../layouts/Layout.astro";
     </div>
 
     <quote-component
-      th:if="${theme.config.home.show_quote == null or theme.config.home.show_quote}"
-      th:attr="data-server=${#strings.isEmpty(theme.config.home.quote_server) ? 'https://dummyjson.com/quotes/random' : theme.config.home.quote_server},data-target=${theme.config.home.quote_target}"
+      th:if="${theme.config.home.show_quote == true and not #strings.isEmpty(theme.config.home.quote_server)}"
+      th:attr="data-server=${theme.config.home.quote_server},data-field=${#strings.isEmpty(theme.config.home.quote_field) ? 'quote' : theme.config.home.quote_field}"
       class="not-prose inline-block mt-12"
     >
       <div
@@ -448,27 +336,58 @@ import Layout from "../layouts/Layout.astro";
 
   <script>
     class QuoteComponent extends HTMLElement {
-      connectedCallback() {
-        const server =
-          this.dataset.server || "https://dummyjson.com/quotes/random";
-        const target =
-          this.dataset.target ||
-          "(data) => (data.quote.length > 80 ? `${data.quote.slice(0, 80)}...` : data.quote || 'Error')";
-        fetch(server)
-          .then((response) => response.json())
-          .then((data) => {
-            const quote = this.querySelector("#quote-sentence");
-            if (!quote) return;
-            const resolveQuote = new Function(
-              "data",
-              `return (${target})(data)`,
-            ) as (data: unknown) => unknown;
-            quote.textContent = String(resolveQuote(data) || "Error");
-          })
-          .catch(() => {
-            const quote = this.querySelector("#quote-sentence");
-            if (quote) quote.textContent = "Error";
+      async connectedCallback() {
+        const quote = this.querySelector("#quote-sentence");
+        if (!quote) return;
+
+        const field = this.dataset.field || "quote";
+        const fieldPathPattern = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*$/;
+        let server: URL;
+        try {
+          server = new URL(this.dataset.server || "", window.location.href);
+        } catch {
+          quote.textContent = "Quote unavailable";
+          return;
+        }
+        if (
+          !["http:", "https:"].includes(server.protocol) ||
+          !fieldPathPattern.test(field)
+        ) {
+          quote.textContent = "Quote unavailable";
+          return;
+        }
+
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 5000);
+        try {
+          const response = await fetch(server, {
+            headers: { Accept: "application/json" },
+            signal: controller.signal,
           });
+          if (!response.ok) throw new Error("Quote request failed");
+          const data: unknown = await response.json();
+          const value = field.split(".").reduce<unknown>((current, key) => {
+            if (
+              typeof current !== "object" ||
+              current === null ||
+              !(key in current)
+            ) {
+              return undefined;
+            }
+            return (current as Record<string, unknown>)[key];
+          }, data);
+          if (typeof value !== "string" && typeof value !== "number") {
+            throw new Error("Quote field is not text");
+          }
+          const sentence = String(value).trim();
+          if (!sentence) throw new Error("Quote is empty");
+          quote.textContent =
+            sentence.length > 80 ? `${sentence.slice(0, 80)}...` : sentence;
+        } catch {
+          quote.textContent = "Quote unavailable";
+        } finally {
+          window.clearTimeout(timeout);
+        }
       }
     }
     if (!customElements.get("quote-component")) {

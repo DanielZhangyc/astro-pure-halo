@@ -1,6 +1,6 @@
 {
   "name": "astro-pure-halo",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "license": "Apache-2.0",
   "repository": {
@@ -15,7 +15,8 @@
   "scripts": {
     "dev": "./scripts/dev.sh",
     "theme:watch": "nodemon --config nodemon.json --exec 'astro build'",
-    "build": "astro build",
+    "build:astro": "astro build",
+    "build": "./scripts/package.sh",
     "check": "astro check",
     "halo:download": "./scripts/halo-download.sh",
     "halo:start": "./scripts/halo-start.sh",

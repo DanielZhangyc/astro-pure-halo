@@ -53,12 +53,39 @@
       );
       if (!input || !clear || !drawer || !message || !results) return;
 
-      const safeHighlight = (value = "") => {
-        const span = document.createElement("span");
-        span.textContent = value;
-        return span.innerHTML
-          .replaceAll("&lt;mark&gt;", "<mark>")
-          .replaceAll("&lt;/mark&gt;", "</mark>");
+      const appendHighlightedText = (container: HTMLElement, value = "") => {
+        const parsed = new DOMParser().parseFromString(value, "text/html");
+        const appendNode = (node: Node, target: HTMLElement) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            target.append(document.createTextNode(node.textContent || ""));
+            return;
+          }
+          if (!(node instanceof HTMLElement)) return;
+          if (["SCRIPT", "STYLE"].includes(node.tagName)) return;
+          if (node.tagName === "MARK") {
+            const mark = document.createElement("mark");
+            target.append(mark);
+            node.childNodes.forEach((child) => appendNode(child, mark));
+            return;
+          }
+          node.childNodes.forEach((child) => appendNode(child, target));
+        };
+        parsed.body.childNodes.forEach((node) => appendNode(node, container));
+      };
+
+      const safePermalink = (value = "/") => {
+        try {
+          const url = new URL(value, window.location.origin);
+          if (
+            !["http:", "https:"].includes(url.protocol) ||
+            url.origin !== window.location.origin
+          ) {
+            return "/";
+          }
+          return `${url.pathname}${url.search}${url.hash}`;
+        } catch {
+          return "/";
+        }
       };
 
       const clearSearch = () => {
@@ -105,7 +132,15 @@
                 signal: this.controller.signal,
               },
             );
-            const data = await response.json();
+            if (!response.ok) throw new Error("Search request failed");
+            const data: {
+              hits?: Array<{
+                permalink?: string;
+                title?: string;
+                description?: string;
+                content?: string;
+              }>;
+            } = await response.json();
             const hits = Array.isArray(data.hits) ? data.hits : [];
             message.textContent =
               hits.length === 0
@@ -113,28 +148,30 @@
                 : hits.length === 1
                   ? `1 result for “${keyword}”`
                   : `${hits.length} results for “${keyword}”`;
-            results.innerHTML = hits
-              .map(
-                (hit: {
-                  permalink?: string;
-                  title?: string;
-                  description?: string;
-                  content?: string;
-                }) => `
-                  <li class="pagefind-ui__result">
-                    <div class="pagefind-ui__result-inner">
-                      <p class="pagefind-ui__result-title">
-                        <a class="pagefind-ui__result-link" href="${encodeURI(hit.permalink || "/")}">
-                          ${safeHighlight(hit.title)}
-                        </a>
-                      </p>
-                      <p class="pagefind-ui__result-excerpt">
-                        ${safeHighlight(hit.description || hit.content)}
-                      </p>
-                    </div>
-                  </li>`,
-              )
-              .join("");
+            const fragment = document.createDocumentFragment();
+            hits.forEach((hit) => {
+              const item = document.createElement("li");
+              item.className = "pagefind-ui__result";
+              const inner = document.createElement("div");
+              inner.className = "pagefind-ui__result-inner";
+              const title = document.createElement("p");
+              title.className = "pagefind-ui__result-title";
+              const link = document.createElement("a");
+              link.className = "pagefind-ui__result-link";
+              link.href = safePermalink(hit.permalink);
+              appendHighlightedText(link, hit.title);
+              title.append(link);
+              const excerpt = document.createElement("p");
+              excerpt.className = "pagefind-ui__result-excerpt";
+              appendHighlightedText(
+                excerpt,
+                hit.description || hit.content || "",
+              );
+              inner.append(title, excerpt);
+              item.append(inner);
+              fragment.append(item);
+            });
+            results.replaceChildren(fragment);
           } catch (error) {
             if ((error as Error).name !== "AbortError") {
               message.textContent = "Search failed.";

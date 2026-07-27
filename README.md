@@ -1,95 +1,106 @@
 # Astro Pure for Halo
 
-本项目是 [Astro Theme Pure](https://github.com/cworld1/astro-theme-pure) 的Halo 移植版本
+Astro Pure for Halo 是 [Astro Theme Pure](https://github.com/cworld1/astro-theme-pure)
+的 Halo 移植版本。主题保留 Pure 的核心设计语言、主要布局和交互方式，并适配
+Halo 的内容模型、模板 API、评论与插件生态。
 
-## 功能概览
+## 功能
 
-- Home、Blog、Post、Archives、Tags、Search 与错误页面；
-- Halo 分类、作者、独立页面与评论；
-- Header、Footer、三态主题切换与移动端菜单；
-- 文章目录、阅读进度、分享、二维码、Medium Zoom 与相邻文章；
+- 首页、文章列表、文章详情、归档、分类、标签、作者、搜索与错误页面；
+- 独立页面、评论、分页、导航、封面图与响应式布局；
+- 三态主题切换、文章目录、阅读进度、分享、二维码与图片缩放；
 - Common Links、Links with Bad Status、Special Links 与友链历史；
-- Moments 插件适配；
-- 集中展示隐私、版权与使用规则的站点条款页面。
+- Moments 插件页面适配；
+- 可选的站点条款页面。
 
-当前开发进度见 [Roadmap](docs/ROADMAP.md)。
+主题声明兼容 Halo `>=2.25.0`，并已在 Halo 2.25.0 环境验证。
 
-## 安装与初始化
+## 安装与启用
 
-安装主题后，需要在 Halo「内容 → 页面」中创建以下页面：
+1. 在 Halo Console 进入「外观 → 主题」。
+2. 点击「主题管理 → 安装主题」，上传发布页提供的 ZIP 制品。
+3. 安装完成后启用 Astro Pure。
+4. 进入主题设置，填写首页资料并按需开启可选区块。
+5. 配置 Primary Menu，并按下表创建所需独立页面。
 
-| 页面路径 | 页面模板      | 是否必需 |
-| -------- | ------------- | -------- |
-| `/blog`  | Pure Blog     | 是       |
-| `/about` | 默认          | 是       |
-| `/terms` | Pure 站点条款 | 是       |
-| `/links` | Pure Links    | 否       |
+| 页面路径 | 页面模板      | 用途                      |
+| -------- | ------------- | ------------------------- |
+| `/blog`  | Pure Blog     | Pure 风格文章列表         |
+| `/about` | 默认          | 首页 “More about me” 入口 |
+| `/terms` | Pure 站点条款 | 页脚站点条款入口          |
+| `/links` | Pure Links    | 可选友链页面              |
 
-## 配置说明
+未安装评论插件时，其他页面仍可正常使用，只是不显示评论区。Moments 页面需要
+[plugin-moments](https://github.com/halo-sigs/plugin-moments) 提供路由和数据；
+没有使用瞬间功能的站点无需安装该插件。
 
-### 基础与内容
+## 配置
 
-站点标题、副标题、favicon、语言和主导航继续使用 Halo 的站点设置与 Primary
-Menu。主题设置补充默认社交分享图片、标题分隔符、Open Graph locale 和日期
-locale。
+站点标题、副标题、favicon、语言和主导航读取 Halo 站点设置。主题设置提供以下
+能力：
 
-内容设置支持 Pure Blog 每页文章数、文章分享平台、正文外链标记、图片说明、
-引用文字样式和行内代码样式。Pure Blog 的每页文章数只作用于该自定义页面；
-Halo 原生分类、标签和作者列表的分页仍由 Halo 控制。
+- 首页头像、显示名称、所在地、简介，以及 Education、Website List、
+  Certifications、Skills 等可选区块；
+- IBM Plex Sans、系统字体或站点运营者上传的自定义 WOFF2 字体；
+- Blog 每页文章数、文章分享平台、正文外链标记、图片说明和文字样式；
+- 友链列表、友链历史和申请说明；
+- 文章封面、目录、阅读进度、评论、相邻文章和 Medium Zoom；
+- 页脚链接、社交链接、备案信息、版权名称和站点条款入口。
 
-### 首页
+所有可选首页区块默认关闭，填写真实内容后再开启。随机名言默认关闭；启用时填写
+返回 JSON 的 HTTP(S) 接口和字段路径，例如 `quote` 或 `data.content`。字段路径
+只读取 JSON 数据，不执行 JavaScript。
 
-首页支持个人资料、Education、Website List、Certifications、Skills 与随机名言。
-各内容区块分别提供显示开关与内容列表。随机名言可设置 JSON 接口和与 Pure
-`quote.target` 等价的解析函数；解析函数属于可执行 JavaScript，仅应使用受信任
-的配置。
+## 外部请求与隐私
 
-### 友链
+主题本身不包含遥测、访问统计、广告或隐藏的数据上报。默认状态下不会自动请求
+随机名言或第三方字体服务。主题在本地加载随制品提供的 IBM Plex Sans，并在字体
+缺字或加载失败时回退到系统无衬线字体；同时会在浏览器 `localStorage` 中保存
+明暗主题偏好。
 
-友链设置由以下五部分组成：
+选择“自定义 WOFF2”后，Regular 字体文件为必填，Italic、Medium 和 Medium
+Italic 可选。字体通过 Halo 附件库配置，不允许注入任意 CSS；只加载 HTTP(S)
+地址并拒绝 HTTPS 页面中的 HTTP 字体。站点运营者应确认拥有相应字体的网页托管、
+传输和使用授权。外部存储地址还需允许站点来源跨域加载字体。
 
-1. Common Links；
-2. Links with Bad Status；
-3. Special Links；
-4. Link History Book；
-5. Apply Links 申请说明。
+以下功能会在站点运营者配置或访客主动操作后产生外部请求：
 
-三类友链使用相同的数据结构，包括站点名称、简介、地址与头像。头像为空时，主题
-根据站点地址请求 `/favicon.ico`。
+- 开启随机名言后，访客浏览器会请求所配置的 JSON 接口；
+- 友链未配置头像时，访客浏览器会请求对应站点的 `/favicon.ico`；
+- 访客点击微博、X 或 Bluesky 分享按钮后会打开相应分享服务；
+- 访客点击外部链接、社交链接或站点运营者配置的其他地址后会访问目标站点。
 
-Apply Links 中的本站名称、简介、地址与头像读取 Halo 站点设置，不需要重复配置。
+站点运营者应确保所配置的第三方服务合法可用，并在站点隐私说明中披露服务名称、
+用途、数据流向和关闭方式。删除相关配置或关闭对应开关即可停止主题发起该类请求。
 
-### 文章
+## 升级、停用与卸载
 
-文章设置包括封面、目录样式、阅读进度、评论、相邻文章与 Medium Zoom。
-Medium Zoom 可进一步设置图片选择器和打开状态的 className。
+升级前建议备份 Halo 数据和主题设置。上传新版本并完成升级后，如果
+`settings.yaml` 有变化，请在主题详情菜单执行「重载主题配置」，再检查新增设置的
+默认值。
 
-### 站点条款
+停用或切换主题不会删除文章、页面、评论、附件或其他 Halo 内容。卸载前应先切换
+到其他可用主题；卸载只移除主题文件和该主题的配置资源，不会删除站点内容。重新
+安装后如需恢复个性化配置，请从备份恢复或重新填写。
 
-`/terms` 默认包含使用规则、个人信息处理、第三方服务、未成年人、版权、免责
-声明、条款更新与联系方式。普通个人博客可以直接使用默认内容。
+## 故障排查
 
-### 页脚
+- 页面显示 404：确认已按安装表创建页面，并为页面选择了正确模板和固定链接。
+- 设置项没有更新：在主题详情菜单执行「重载主题配置」。
+- 评论区不显示：确认评论插件已安装、启用，且主题的文章评论开关已开启。
+- Moments 页面不可用：确认 Moments 插件已安装、启用且版本与当前 Halo 兼容。
+- 随机名言显示不可用：确认接口允许浏览器跨域访问、返回 JSON、字段路径正确，
+  且请求能在 5 秒内完成。
+- 图片缩放未启用：检查 Medium Zoom 选择器是否为有效 CSS 选择器。
 
-页脚支持版权起始年份、两种位置的通用链接、社交链接、备案信息、站点条款、
-Halo & Pure Powered、GitHub 与 RSS。未配置通用社交链接时继续使用 GitHub 与
-RSS 兼容开关；备案信息默认为空。兼容开关中的 GitHub 地址固定指向
-[DanielZhangyc/astro-pure-halo](https://github.com/DanielZhangyc/astro-pure-halo)。
+问题反馈请使用
+[GitHub Issues](https://github.com/DanielZhangyc/astro-pure-halo/issues)。
 
-Projects 专用页面仍处于撤下状态，本次设置补全没有恢复 Projects、Sponsors 或
-Sponsorship 配置。
+## 功能边界
 
-## 开发状态
-
-- [x] About 使用 Halo 默认页面正文，并保留旧模板兼容
-- [x] 友链页面及五项配置
-- [x] 单页站点条款
-- [x] Moments 插件适配
-- [ ] Projects 专用页面与模块化设置
-- [ ] 文章底部 “Buy me a cup of coffee”
-
-Projects 与文章赞助入口当前不参与页面渲染。旧版本的 Pure Projects 模板会回退
-为普通 Halo 页面正文。
+本版本不提供 Projects、Sponsors、Sponsorship 或文章赞助入口。旧版本的
+Pure Projects 模板会作为普通 Halo 页面展示正文，这些未提供的功能不会以占位
+内容出现在默认站点中。
 
 ## 开发与构建
 
@@ -100,16 +111,10 @@ pnpm install
 pnpm dev
 ```
 
-默认服务地址：
+默认地址：
 
 - 站点：<http://localhost:8090>
 - Console：<http://localhost:8090/console>
-
-可以通过环境变量修改端口：
-
-```bash
-HALO_PORT=8091 pnpm dev
-```
 
 执行检查、构建与打包：
 
@@ -119,24 +124,20 @@ pnpm build
 pnpm package
 ```
 
-构建结果写入 `templates/`，主题安装包写入 `dist/`。`templates/` 属于构建产物，
-不应直接修改。
+构建结果写入 `templates/`，主题 ZIP 写入 `dist/`。`templates/` 是生成物，不应
+直接修改。
 
-## 移植基准
+## 移植与许可证
 
 - 上游仓库：[cworld1/astro-theme-pure](https://github.com/cworld1/astro-theme-pure)
-- 本地对照：`.reference/astro-theme-pure`
-- 对照提交：`0047f6d4278d4c3e823dca608022cd6ebe7b5c96`
+- 本地只读对照：`.reference/astro-theme-pure`
+- 当前对照提交：`0047f6d4278d4c3e823dca608022cd6ebe7b5c96`
 - 项目约束：[AGENTS.md](AGENTS.md)
 
-## 相关文档
+本项目基于 Apache License 2.0 发布，上游来源和第三方 JavaScript 许可证见
+[NOTICE](NOTICE) 及制品内的许可证文件。
 
-- [开发说明](docs/DEVELOPMENT.md)
-- [实施报告](docs/IMPLEMENTATION_REPORT.md)
-- [开发计划](docs/ROADMAP.md)
-
-## 开源许可
-
-本项目基于 Apache License 2.0 发布，上游来源与许可信息见 [NOTICE](NOTICE)。
-
-原主题仓库：[cworld1/astro-theme-pure](https://github.com/cworld1/astro-theme-pure)
+上游使用 Fontshare 提供的 Satoshi 字体。其 ITF Free Font License 不允许本项目
+把字体文件作为主题制品再次分发，因此 Halo 移植版默认使用采用 SIL Open Font
+License 1.1 的 IBM Plex Sans，并保留系统无衬线字体回退；这是为满足字体授权要求
+而保留的受控差异。

@@ -1,88 +1,40 @@
-/*
- * Exact Satoshi font faces used by Astro Theme Pure 4.1.4.
- * Font files are copied from the upstream Astro build cache.
- */
 @font-face {
-  font-family: Satoshi-9613b77c75735b12;
-  src: url("/themes/astro-pure-halo/assets/pure/fonts/font-satoshi-400-normal-b372976faae541b1.woff2")
+  font-family: "IBM Plex Sans";
+  src: url("../assets/fonts/ibm-plex-sans-400-normal.woff2")
     format("woff2");
   font-display: swap;
   font-weight: 400;
   font-style: normal;
 }
 @font-face {
-  font-family: Satoshi-9613b77c75735b12;
-  src: url("/themes/astro-pure-halo/assets/pure/fonts/font-satoshi-400-italic-20878e2d8370077a.woff2")
+  font-family: "IBM Plex Sans";
+  src: url("../assets/fonts/ibm-plex-sans-400-italic.woff2")
     format("woff2");
   font-display: swap;
   font-weight: 400;
   font-style: italic;
 }
 @font-face {
-  font-family: Satoshi-9613b77c75735b12;
-  src: url("/themes/astro-pure-halo/assets/pure/fonts/font-satoshi-500-normal-8b39278bc39e0777.woff2")
+  font-family: "IBM Plex Sans";
+  src: url("../assets/fonts/ibm-plex-sans-500-normal.woff2")
     format("woff2");
   font-display: swap;
   font-weight: 500;
   font-style: normal;
 }
 @font-face {
-  font-family: Satoshi-9613b77c75735b12;
-  src: url("/themes/astro-pure-halo/assets/pure/fonts/font-satoshi-500-italic-3d991eebd114d582.woff2")
+  font-family: "IBM Plex Sans";
+  src: url("../assets/fonts/ibm-plex-sans-500-italic.woff2")
     format("woff2");
   font-display: swap;
   font-weight: 500;
   font-style: italic;
-}
-@font-face {
-  font-family: "Satoshi-9613b77c75735b12 fallback: Arial";
-  src: local("Arial");
-  font-display: swap;
-  font-weight: 400;
-  font-style: normal;
-  size-adjust: 98.9231%;
-  ascent-override: 102.0995%;
-  descent-override: 24.2613%;
-  line-gap-override: 10.1089%;
-}
-@font-face {
-  font-family: "Satoshi-9613b77c75735b12 fallback: Arial";
-  src: local("Arial");
-  font-display: swap;
-  font-weight: 400;
-  font-style: italic;
-  size-adjust: 98.9231%;
-  ascent-override: 102.0995%;
-  descent-override: 24.2613%;
-  line-gap-override: 10.1089%;
-}
-@font-face {
-  font-family: "Satoshi-9613b77c75735b12 fallback: Arial";
-  src: local("Arial");
-  font-display: swap;
-  font-weight: 500;
-  font-style: normal;
-  size-adjust: 98.9231%;
-  ascent-override: 102.0995%;
-  descent-override: 24.2613%;
-  line-gap-override: 10.1089%;
-}
-@font-face {
-  font-family: "Satoshi-9613b77c75735b12 fallback: Arial";
-  src: local("Arial");
-  font-display: swap;
-  font-weight: 500;
-  font-style: italic;
-  size-adjust: 98.9231%;
-  ascent-override: 102.0995%;
-  descent-override: 24.2613%;
-  line-gap-override: 10.1089%;
 }
 :root {
-  --font-satoshi:
-    Satoshi-9613b77c75735b12,
-    "Satoshi-9613b77c75735b12 fallback: Arial", sans-serif;
+  --font-pure:
+    "IBM Plex Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
 body {
-  font-family: var(--font-satoshi);
+  font-family: var(--font-pure);
 }

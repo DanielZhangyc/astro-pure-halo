@@ -26,6 +26,12 @@ const { highlightColor = "#659EB9", socialCard = true } = Astro.props;
 <html
   lang="en-US"
   th:lang="${site.language}"
+  data-font-source="ibm_plex"
+  data-custom-font-regular=""
+  data-custom-font-italic=""
+  data-custom-font-medium=""
+  data-custom-font-medium-italic=""
+  th:attr="data-font-source=${#strings.isEmpty(theme.config.style.font_source) ? 'ibm_plex' : theme.config.style.font_source},data-custom-font-regular=${theme.config.style.custom_font_regular},data-custom-font-italic=${theme.config.style.custom_font_italic},data-custom-font-medium=${theme.config.style.custom_font_medium},data-custom-font-medium-italic=${theme.config.style.custom_font_medium_italic}"
   style={`--highlightColor:${highlightColor}`}
   th:style="|--highlightColor:${#strings.isEmpty(theme.config.style.highlight_color) ? '#659EB9' : theme.config.style.highlight_color}|"
 >
@@ -121,6 +127,71 @@ const { highlightColor = "#659EB9", socialCard = true } = Astro.props;
           ?.setAttribute("content", theme === "dark" ? "#0B0B10" : "#FCFCFD");
       }
       simpleSetTheme();
+    </script>
+
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const systemFontStack =
+          'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        const fallbackFontStack = `"IBM Plex Sans", ${systemFontStack}`;
+        const source = root.dataset.fontSource || "ibm_plex";
+
+        if (source === "system") {
+          root.style.setProperty("--font-pure", systemFontStack);
+          return;
+        }
+        if (source !== "custom" || !("FontFace" in window)) return;
+
+        const parseFontUrl = (value) => {
+          if (!value) return null;
+          try {
+            const url = new URL(value, window.location.href);
+            const secure =
+              url.protocol === "https:" ||
+              (url.protocol === "http:" &&
+                window.location.protocol === "http:");
+            return secure ? url.href : null;
+          } catch {
+            return null;
+          }
+        };
+        const faces = [
+          [root.dataset.customFontRegular, "400", "normal"],
+          [root.dataset.customFontItalic, "400", "italic"],
+          [root.dataset.customFontMedium, "500", "normal"],
+          [root.dataset.customFontMediumItalic, "500", "italic"],
+        ];
+        if (!parseFontUrl(faces[0][0])) return;
+
+        let added = 0;
+        faces.forEach(([value, weight, style]) => {
+          const url = parseFontUrl(value);
+          if (!url) return;
+          try {
+            const face = new FontFace(
+              "Pure Custom Font",
+              `url(${JSON.stringify(url)}) format("woff2")`,
+              { display: "swap", style, weight },
+            );
+            document.fonts.add(face);
+            face.load().catch(() => {
+              console.warn(`Unable to load custom font (${weight} ${style}).`);
+            });
+            added += 1;
+          } catch {
+            console.warn(
+              `Unable to register custom font (${weight} ${style}).`,
+            );
+          }
+        });
+        if (added > 0) {
+          root.style.setProperty(
+            "--font-pure",
+            `"Pure Custom Font", ${fallbackFontStack}`,
+          );
+        }
+      })();
     </script>
 
     <slot name="head" />

@@ -53,7 +53,7 @@ Tag 列表结构，避免创造新的视觉语言。
 ## 验证记录
 
 - `pnpm check`：0 errors、0 warnings、0 hints。
-- `pnpm build`：生成 20 个 Halo Thymeleaf 页面模板。
+- `pnpm build`：生成 22 个 Halo Thymeleaf 页面模板，并复制 2 个共享片段。
 - `pnpm package`：成功生成可安装 ZIP。
 - Halo 2.25.0：真实实例安装、启用、主题重载和路由渲染通过。
 - Search：对 `Halo` 搜索得到 1 条真实文章结果，标题与摘要高亮正常。

@@ -89,6 +89,14 @@ git diff --stat origin/main origin/dev
 `git pull --ff-only`，发现分叉时先检查远端 PR 和分支来源，不在 `main` 或 `dev`
 上直接整理历史。
 
+如果 `main → dev` 因反复 Squash 产生版本文件冲突，可先关闭冲突的同步 PR，
+从最新 `dev` 创建 `sync/vX.Y.Z`，仅从 `origin/main` 复制 `package.json`、
+`theme.yaml` 和 `CHANGELOG.md`，再向 `dev` 提交 PR。策略要求分支版本与
+`main` 一致，三个文件与 `main` 完全一致，且 `package.json` 和 `theme.yaml`
+相对 `dev` 只能修改版本号，其他文件不得变化。如果 `dev` 已有额外依赖或
+主题描述变更，此捷径会被拒绝，需要另行处理，不能覆盖下一版本开发内容。
+此同步方式会保留 `dev` 上已有的流程修复，因此同步后允许存在这些已知差异。
+
 ## GitHub Release 自动发布
 
 `.github/workflows/release.yaml` 在 `main` 的 CI 成功后自动运行。版本不是根据

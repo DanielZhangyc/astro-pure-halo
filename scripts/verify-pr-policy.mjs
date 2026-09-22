@@ -5,6 +5,7 @@ const headRef = process.env.GITHUB_HEAD_REF;
 const baseSha = process.env.BASE_SHA;
 const headSha = process.env.HEAD_SHA;
 const integrationSha = process.env.INTEGRATION_SHA;
+const stableSha = process.env.STABLE_SHA;
 
 if (!baseRef || !headRef || !baseSha || !headSha) {
   fail(
@@ -138,6 +139,54 @@ if (baseRef === "main") {
 }
 
 if (baseRef === "dev") {
+  const syncMatch = headRef.match(/^sync\/v(\d+\.\d+\.\d+)$/);
+  if (syncMatch) {
+    if (!stableSha) fail("STABLE_SHA is required for release synchronization.");
+    const stableVersions = readVersions(stableSha);
+    assertVersionFilesMatch(stableVersions, "Main");
+    if (
+      syncMatch[1] !== stableVersions.packageVersion ||
+      headVersions.packageVersion !== stableVersions.packageVersion
+    ) {
+      fail(
+        "sync branch and head versions must match the current main release.",
+      );
+    }
+    if (
+      compareVersions(
+        parseStableVersion(headVersions.packageVersion, "Sync branch"),
+        parseStableVersion(baseVersions.packageVersion, "Dev branch"),
+      ) < 0
+    ) {
+      fail("release synchronization cannot downgrade dev.");
+    }
+    const releaseFiles = ["package.json", "theme.yaml", "CHANGELOG.md"];
+    const changedFiles = git("diff", "--name-only", "-z", baseSha, headSha)
+      .split("\0")
+      .filter(Boolean);
+    if (changedFiles.some((path) => !releaseFiles.includes(path))) {
+      fail("sync branches may only change release metadata files.");
+    }
+    if (git("diff", stableSha, headSha, "--", ...releaseFiles)) {
+      fail("sync release metadata must exactly match main.");
+    }
+    for (const path of ["package.json", "theme.yaml"]) {
+      const stripVersion = (source) =>
+        source.replace(
+          /^(\s*(?:"version"|version):\s*)["']?[^"'\s,]+["']?/m,
+          "$1VERSION",
+        );
+      if (
+        stripVersion(readAt(baseSha, path)) !==
+        stripVersion(readAt(headSha, path))
+      ) {
+        fail(`sync branches may only update the version in ${path}.`);
+      }
+    }
+    console.log(`Validated release metadata synchronization ${syncMatch[1]}.`);
+    process.exit(0);
+  }
+
   if (headRef === "main") {
     const baseVersion = parseStableVersion(
       baseVersions.packageVersion,

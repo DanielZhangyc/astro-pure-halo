@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@unocss/astro": "66.6.8",
-    "astro": "^6.1.4",
+    "astro": "^6.4.8",
     "medium-zoom": "1.1.0",
     "qrcodejs": "1.0.0",
     "sharp": "^0.34.5",

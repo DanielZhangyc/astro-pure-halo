@@ -5,6 +5,12 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-22
+
+### Changed
+
+- 将 Astro 构建依赖从 6.1.4 升级到 6.4.8，并更新相关传递依赖。
+
 ## [0.2.0] - 2026-07-28
 
 ### Added
@@ -52,7 +58,8 @@
 
 - 移除授权来源不明确的 Satoshi 字体文件。
 
-[Unreleased]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.8...v0.2.0
 [0.1.8]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.6...v0.1.7

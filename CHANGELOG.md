@@ -5,6 +5,24 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-28
+
+### Added
+
+- 增加 Halo 官方链接管理插件适配，支持分组筛选、随机排序和 Pure 风格友链卡片。
+- 增加 Halo 官方图库管理插件的列表与详情模板，支持分组、分页、相邻图片导航、
+  EXIF 信息、标签和评论。
+- 增加发布制品到 Halo 应用市场的自动化流程。
+
+### Changed
+
+- 精简 README，更新主题预览图和可选插件说明。
+- 明确 `main` 发布内容回灌 `dev` 后的分支关系和验证方式。
+
+### Removed
+
+- 移除主题内置友链数据配置，友链内容改由 Halo 官方链接管理插件维护。
+
 ## [0.1.8] - 2026-07-27
 
 ### Added
@@ -34,6 +52,7 @@
 
 - 移除授权来源不明确的 Satoshi 字体文件。
 
-[Unreleased]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.8...HEAD
+[Unreleased]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.8...v0.2.0
 [0.1.8]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/DanielZhangyc/astro-pure-halo/compare/v0.1.6...v0.1.7
